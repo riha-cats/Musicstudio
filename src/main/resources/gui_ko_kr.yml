@@ -4,7 +4,7 @@
 # 인벤토리 제목, 아이템 이름, lore 를 전부 여기서 바꿀 수 있습니다
 # 기울임(italic)은 기본으로 꺼져 있고, <i>...</i> 로 감싼 부분만 기울여집니다
 # <key> 플레이스홀더는 플러그인이 채워 넣습니다. 각 항목 주석 참고
-config-version: 2
+config-version: 3
 
 # =================================================================
 # 에디터
@@ -15,16 +15,24 @@ editor:
 
   header:
     # <n>=레이어번호, <layer_name>, <instrument>, <volume>, <muted>(음소거 표시), <total>
-    name: "<white>레이어 <n>: <layer_name>"
-    name-muted: "<dark_gray>레이어 <n>: <layer_name>"
+    name: "<white>레이어 <n>"
+    name-muted: "<dark_gray>레이어 <n>"
+    name-moving: "<gold>이동 중인 레이어 <n>"
     lore:
+      - "<white>현재 위치: <n> / <total>"
       - "<gray>악기: <instrument>"
       - "<gray>볼륨: <volume>%<muted>"
       - ""
       - "<yellow>좌클릭: 악기 변경"
       - "<yellow>우클릭: 음소거 토글"
       - "<yellow>Shift+좌/우클릭: 볼륨 ±10%"
+      - "<aqua>F: 레이어 이동 시작 / 이동할 위치 선택"
       - "<red>Q키(드롭): 레이어 삭제"
+    lore-moving:
+      - "<gold>이동 중인 레이어 <n>"
+      - "<white>현재 위치: <n> / <total>"
+      - "<gray>F: 다른 레이어 헤더의 위치로 이동"
+      - "<gray>같은 레이어에서 F: 이동 취소"
 
   note:
     # <key_name>, <key>, <tick>, <layer>

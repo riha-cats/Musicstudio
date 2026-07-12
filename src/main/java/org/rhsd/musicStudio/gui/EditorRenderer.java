@@ -81,7 +81,7 @@ public final class EditorRenderer {
             // [A] :: 존재하는 레이어인가? 헤더 + 그리드 셀
             if (layerIdx < song.layerCount()) {
                 Layer layer = song.layer(layerIdx);
-                inv.setItem(base, headerItem(gui, layerIdx, layer, song.layerCount()));
+                inv.setItem(base, headerItem(gui, layerIdx, layer, song.layerCount(), session.isMovingLayer(layerIdx)));
                 for (int c = 0; c < EditorSession.VISIBLE_TICKS; c++) {
                     int tick = tickOffset + c;
                     int slot = base + GRID_COL_START + c;
@@ -147,7 +147,7 @@ public final class EditorRenderer {
     // 아이템 빌더
     // =================================================================
 
-    private static ItemStack headerItem(GuiConfig gui, int layerIdx, Layer layer, int total) {
+    private static ItemStack headerItem(GuiConfig gui, int layerIdx, Layer layer, int total, boolean moving) {
         String[] ph = {
                 "n", String.valueOf(layerIdx + 1),
                 "layer_name", layer.name(),
@@ -156,8 +156,12 @@ public final class EditorRenderer {
                 "muted", layer.muted() ? " (음소거)" : "",
                 "total", String.valueOf(total)
         };
-        Component name = gui.name(layer.muted() ? "editor.header.name-muted" : "editor.header.name", ph);
-        return item(layer.instrument().icon(), name, gui.lore("editor.header.lore", ph));
+        Component name = gui.name(moving ? "editor.header.name-moving"
+                : layer.muted() ? "editor.header.name-muted" : "editor.header.name", ph);
+        ItemStack result = item(layer.instrument().icon(), name,
+                gui.lore(moving ? "editor.header.lore-moving" : "editor.header.lore", ph));
+        if (moving) setGlint(result);
+        return result;
     }
 
     private static ItemStack noteItem(GuiConfig gui, Layer layer, Note note, boolean selected, boolean tickSelected) {

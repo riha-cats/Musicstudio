@@ -37,6 +37,7 @@ public final class EditorSession {
     private Integer selectedLayer;
     private int cursorTick = -1;
     private int playingTick = -1;
+    private Integer movingLayerIndex;
 
     private final NavigableSet<SelectedCell> selectedCells = new TreeSet<>();
     private Integer rangeAnchorTick;
@@ -80,23 +81,52 @@ public final class EditorSession {
     }
     public void clearSelection() { selectedTick = null; selectedLayer = null; }
 
-    public void onLayerDeleted(int deletedLayer) {
+    public boolean hasMovingLayer() { return movingLayerIndex != null; }
+    public Integer movingLayerIndex() { return movingLayerIndex; }
+    public boolean isMovingLayer(int layer) { return movingLayerIndex != null && movingLayerIndex == layer; }
+    public void beginLayerMove(int layer) { movingLayerIndex = layer; }
+    public void clearLayerMove() { movingLayerIndex = null; }
+
+    public void remapAfterLayerMove(int from, int to) {
+        if (selectedLayer != null) {
+            selectedLayer = Song.remapLayerIndex(selectedLayer, from, to);
+            if (selectedTick == null || song.getNote(selectedTick, selectedLayer) == null) clearSelection();
+        }
+        for (int i = 0; i < clipboardNotes.size(); i++) {
+            ClipboardNote note = clipboardNotes.get(i);
+            clipboardNotes.set(i, new ClipboardNote(note.relativeTick(),
+                    Song.remapLayerIndex(note.layer(), from, to), note.key()));
+        }
+    }
+
+    public void remapAfterLayerDeletion(int deletedLayer) {
+        if (movingLayerIndex != null) {
+            if (movingLayerIndex == deletedLayer) clearLayerMove();
+            else if (movingLayerIndex > deletedLayer) movingLayerIndex--;
+        }
         if (selectedLayer != null) {
             if (selectedLayer == deletedLayer) clearSelection();
             else if (selectedLayer > deletedLayer) selectedLayer--;
         }
-        TreeSet<SelectedCell> adjusted = new TreeSet<>();
+        TreeSet<SelectedCell> adjustedCells = new TreeSet<>();
         for (SelectedCell cell : selectedCells) {
-            if (cell.layer() == deletedLayer) continue;
-            adjusted.add(new SelectedCell(cell.tick(), cell.layer() > deletedLayer ? cell.layer() - 1 : cell.layer()));
+            adjustedCells.add(new SelectedCell(cell.tick(),
+                    cell.layer() > deletedLayer ? cell.layer() - 1 : cell.layer()));
         }
         selectedCells.clear();
-        selectedCells.addAll(adjusted);
-        if (rangeAnchorLayer != null) {
-            if (rangeAnchorLayer == deletedLayer) clearRangeAnchor();
-            else if (rangeAnchorLayer > deletedLayer) rangeAnchorLayer--;
+        selectedCells.addAll(adjustedCells);
+        if (rangeAnchorLayer != null && rangeAnchorLayer > deletedLayer) rangeAnchorLayer--;
+        List<ClipboardNote> adjusted = new ArrayList<>();
+        for (ClipboardNote note : clipboardNotes) {
+            if (note.layer() == deletedLayer) continue;
+            adjusted.add(new ClipboardNote(note.relativeTick(),
+                    note.layer() > deletedLayer ? note.layer() - 1 : note.layer(), note.key()));
         }
+        clipboardNotes.clear();
+        clipboardNotes.addAll(adjusted);
     }
+
+    public void onLayerDeleted(int deletedLayer) { remapAfterLayerDeletion(deletedLayer); }
 
     public int cursorTick() { return cursorTick; }
     public void toggleCursor(int tick) { cursorTick = cursorTick == tick ? -1 : tick; }

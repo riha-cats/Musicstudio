@@ -4,7 +4,7 @@
 # 색상 태그 문서: https://docs.advntr.dev/minimessage/format.html
 # <name>, <count> 같은 플레이스홀더는 플러그인이 채워 넣습니다
 # 명령어 인자 표기는 < > 대신 [ ] 를 씁니다 (MiniMessage 태그와 충돌 방지)
-config-version: 4
+config-version: 5
 
 prefix: "<light_purple>[MusicStudio]</light_purple> "
 
@@ -50,6 +50,10 @@ command:
 # 에디터
 # =================================================================
 editor:
+  layer-move-selected: "<yellow>현재 <white><layer></white>번 위치의 레이어를 선택했습니다. 목적지 레이어 헤더에서 F를 누르세요."
+  layer-move-cancelled: "<gray><white><layer></white>번 위치 레이어의 이동을 취소했습니다."
+  layer-moved: "<green>레이어를 <white><from></white>번 위치에서 <white><to></white>번 위치로 이동했습니다."
+  layer-move-invalid: "<red>레이어를 이동할 수 없습니다. 위치가 더 이상 유효하지 않습니다."
   no-notes: "<gray>재생할 노트가 없습니다."
   play-start: "<green>▶ 미리듣기 시작"
   play-stop: "<gray>■ 정지"
