@@ -1,0 +1,170 @@
+# =================================================================
+# MusicStudio GUI 텍스트 (MiniMessage 문법)
+# =================================================================
+# 인벤토리 제목, 아이템 이름, lore 를 전부 여기서 바꿀 수 있습니다
+# 기울임(italic)은 기본으로 꺼져 있고, <i>...</i> 로 감싼 부분만 기울여집니다
+# <key> 플레이스홀더는 플러그인이 채워 넣습니다. 각 항목 주석 참고
+config-version: 2
+
+# =================================================================
+# 에디터
+# =================================================================
+editor:
+  # <song>
+  title: "<light_purple>♪ <song>"
+
+  header:
+    # <n>=레이어번호, <layer_name>, <instrument>, <volume>, <muted>(음소거 표시), <total>
+    name: "<white>레이어 <n>: <layer_name>"
+    name-muted: "<dark_gray>레이어 <n>: <layer_name>"
+    lore:
+      - "<gray>악기: <instrument>"
+      - "<gray>볼륨: <volume>%<muted>"
+      - ""
+      - "<yellow>좌클릭: 악기 변경"
+      - "<yellow>우클릭: 음소거 토글"
+      - "<yellow>Shift+좌/우클릭: 볼륨 ±10%"
+      - "<red>Q키(드롭): 레이어 삭제"
+
+  note:
+    # <key_name>, <key>, <tick>, <layer>
+    name: "<green><key_name>"
+    name-selected: "<gold>★ <key_name>"
+    lore:
+      - "<aqua>음: <key_name> (key <key>)"
+      - "<gray>틱 <tick> / 레이어 <layer>"
+      - ""
+      - "<yellow>좌클릭: 선택"
+      - "<yellow>우클릭: 반음↑ / Shift+우클릭: 반음↓"
+      - "<red>Shift+좌클릭: 삭제"
+
+  empty-cell:
+    # <tick>, <layer>, <key_name>(현재 음높이)
+    name: "<dark_gray>·"
+    lore:
+      - "<dark_gray>틱 <tick> / 레이어 <layer>"
+      - "<gray>좌클릭: <key_name> 노트 생성"
+
+  add-layer:
+    name: "<green>+ 레이어 추가"
+    lore:
+      - "<gray>클릭하여 새 레이어 추가"
+
+  info:
+    # <song>, <tempo>, <length>, <notes>, <layers>, <max_layers>, <key_name>
+    name: "<light_purple>♪ <song>"
+    lore:
+      - "<gray>템포: 셀당 <tempo>틱"
+      - "<gray>길이: <length>셀 / 노트 <notes>개"
+      - "<gray>레이어: <layers> / <max_layers>"
+      - ""
+      - "<aqua>새 노트 음높이: <key_name>"
+      - "<yellow>좌클릭: 음↑ 우클릭: 음↓ (Shift: 옥타브)"
+
+  # <tick>
+  ruler:
+    name: "<gray>틱 <tick>"
+    lore:
+      - "<gray>클릭: 이 틱에 커서 놓기"
+      - "<gray>커서는 복사/붙여넣기의 기준 위치"
+  ruler-cursor:
+    name: "<yellow>▼ 틱 <tick> (커서)"
+    lore:
+      - "<gray>복사/붙여넣기 기준 위치"
+      - "<gray>다시 클릭하면 해제"
+  ruler-playing:
+    name: "<green>▶ 틱 <tick>"
+
+  filler:
+    name: "<dark_gray> "
+
+  buttons:
+    prev-tick:
+      name: "<aqua>◀ 이전 틱"
+      lore: [ "<gray>왼쪽으로 스크롤", "<gray>Shift: 8틱 점프" ]
+    next-tick:
+      name: "<aqua>다음 틱 ▶"
+      lore: [ "<gray>오른쪽으로 스크롤", "<gray>Shift: 8틱 점프" ]
+    up-layer:
+      name: "<yellow>▲ 레이어 위"
+      lore: [ "<gray>위 레이어 보기" ]
+    down-layer:
+      name: "<yellow>▼ 레이어 아래"
+      lore: [ "<gray>아래 레이어 보기" ]
+    play:
+      name: "<green>▶ 미리듣기"
+      lore: [ "<gray>나에게만 재생됩니다" ]
+    stop:
+      name: "<red>■ 정지"
+      lore: [ "<gray>미리듣기 정지" ]
+    settings:
+      name: "<gold>설정"
+      lore: [ "<gray>템포 · 음반 추출" ]
+    copy:
+      name: "<white>복사"
+      lore:
+        - "<gray>커서 틱의 노트를 복사"
+        - "<gray>Shift: 화면에 보이는 8틱 전체 복사"
+    paste:
+      name: "<white>붙여넣기"
+      lore:
+        - "<gray>커서 틱부터 붙여넣기"
+        - "<gray>커서가 없으면 화면 맨 왼쪽 틱 기준"
+
+# =================================================================
+# 악기 선택 메뉴
+# =================================================================
+instrument:
+  # <n>=레이어번호
+  title: "<dark_aqua>악기 선택 — 레이어 <n>"
+  # <instrument>
+  entry:
+    name: "<white><instrument>"
+    lore: [ "<gray>클릭하여 선택" ]
+  entry-current:
+    name: "<gold><instrument>"
+    lore: [ "<gold>현재 악기" ]
+
+# =================================================================
+# 설정 메뉴
+# =================================================================
+settings:
+  # <song>
+  title: "<gold>설정 — <song>"
+  # <tempo>, <max>, <min>, <cells_per_sec>
+  tempo-down:
+    name: "<red>◀ 느리게"
+    lore:
+      - "<gray>셀당 틱 +1 (느려짐)"
+      - "<gray>현재: 셀당 <tempo>틱"
+      - "<gray>최대 <max>틱/셀"
+  tempo-info:
+    name: "<aqua>템포: 셀당 <tempo>틱"
+    lore:
+      - "<gray><cells_per_sec> 셀/초 (20 TPS 기준)"
+  tempo-up:
+    name: "<green>빠르게 ▶"
+    lore:
+      - "<gray>셀당 틱 -1 (빨라짐)"
+      - "<gray>최소 <min>틱/셀"
+  disc:
+    name: "<light_purple>음반 추출"
+    lore:
+      - "<gray>이 곡을 음반으로 추출합니다."
+      - "<gray>추출된 음반은 소지자 누구나 재생할 수 있습니다."
+  back:
+    name: "<yellow>← 에디터로"
+    lore:
+      - "<gray>편집 화면으로 돌아가기"
+
+# =================================================================
+# 음반 아이템
+# =================================================================
+disc:
+  # <song>, <layers>, <notes>, <cells>
+  name: "<light_purple>♪ <song>"
+  lore:
+    - "<dark_gray>MusicStudio 음반"
+    - "<gray>레이어 <layers> · 노트 <notes> · <cells>셀"
+    - ""
+    - "<yellow>우클릭: 재생 / 다시 우클릭: 정지"

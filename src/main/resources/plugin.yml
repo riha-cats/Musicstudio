@@ -1,0 +1,26 @@
+name: MusicStudio
+description: 음악 스튜디오 - 게임 내 작곡 에디터
+version: '${version}'
+
+main: org.rhsd.musicStudio.MusicStudio
+api-version: '${apiVersion}'
+load: POSTWORLD
+
+authors: [ 리하데스요 ]
+
+# ItemsAdder는 선택적 의존(없어도 동작). 있으면 먼저 로드되도록 보장
+softdepend: [ ItemsAdder ]
+
+commands:
+  음악스튜디오:
+    description: MusicStudio 작곡 에디터
+    usage: /음악스튜디오 도움말
+    aliases: [ 음스, ms, musicstudio ]
+
+permissions:
+  musicstudio.use:
+    description: MusicStudio 에디터 사용
+    default: true
+  musicstudio.admin:
+    description: MusicStudio 관리(.nbs 임포트 등)
+    default: op

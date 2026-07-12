@@ -1,0 +1,10 @@
+# MusicStudio GUI text (English) — MiniMessage syntax
+# Enable with "language: en_us" in config.yml
+# While config-version is 0, missing keys get copied in from gui_ko_kr.yml
+# on load, so you can translate the file in place. Keys you already translated
+# are left untouched
+config-version: 0
+
+editor:
+  # <song>
+  title: "<light_purple>♪ <song>"

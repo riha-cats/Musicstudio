@@ -1,0 +1,11 @@
+# MusicStudio messages (English) — MiniMessage syntax
+# Enable with "language: en_us" in config.yml
+# While config-version is 0, missing keys get copied in from messages_ko_kr.yml
+# on load, so you can translate the file in place. Keys you already translated
+# are left untouched
+config-version: 0
+
+prefix: "<light_purple>[MusicStudio]</light_purple> "
+
+no-permission: "<red>You don't have permission."
+player-only: "<red>Players only."
