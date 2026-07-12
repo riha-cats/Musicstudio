@@ -377,10 +377,20 @@ public final class GuiManager {
             return;
         }
         session.setClipboard(data, cells);
-        msg.send(player, "editor.copy-success", "ticks", String.valueOf(session.selectedTicks().size()),
-                "notes", String.valueOf(data.size()), "from", String.valueOf(session.selectedTicks().first()),
-                "to", String.valueOf(session.selectedTicks().last()));
-    }
+        int first = session.selectedTicks().first();
+        int last = session.selectedTicks().last();
+        int noteCount = data.size();
+        int tickCount = session.selectedTicks().size();
+
+        msg.send(player, "editor.copy-success",
+                "tick", String.valueOf(first),
+                "count", String.valueOf(noteCount),
+
+                "ticks", String.valueOf(tickCount),
+                "notes", String.valueOf(noteCount),
+                "from", String.valueOf(first),
+                "to", String.valueOf(last));
+            }
 
     private void doPaste(Player player, EditorSession session, int base) {
         if (!session.hasClipboard()) {
