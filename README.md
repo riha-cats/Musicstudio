@@ -21,15 +21,15 @@ In-game music composition studio — compose songs in a tracker-style GUI, press
 
 ## Supported Versions
 
-A separate build is provided per Minecraft version under `build/libs/Upload/<version>/`. Each jar runs on **both Paper and Purpur**.
+One jar is provided per version series under `build/libs/Upload/<series>/`. Each jar runs on **both Paper and Purpur**.
 
-| Series | Versions |
-|--------|----------|
-| 1.20.x | 1.20, 1.20.1, 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6 |
-| 1.21.x | 1.21, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11 |
-| 26.x   | 26.1.2 |
+| Folder | Supported server versions |
+|--------|---------------------------|
+| `1.20` | 1.20 – 1.20.6 (all 1.20.x) |
+| `1.21` | 1.21 – 1.21.11 (all 1.21.x) |
+| `26.1.2` | 26.1.2 only |
 
-> 1.20–1.20.4 require Java 17; 1.20.5 and up require Java 21; 26.x requires Java 25 — the same requirement as the underlying server.
+> The Java requirement follows the server: 1.20–1.20.4 need Java 17, 1.20.5+ need Java 21, 26.x needs Java 25.
 
 ## Permissions
 
@@ -131,7 +131,7 @@ Switch the server to English: set `language: en_us` in `config.yml`, then:
 
 ## Installation
 
-1. Pick the jar matching your Minecraft version from `build/libs/Upload/<version>/`.
+1. Pick the jar matching your Minecraft version series from `build/libs/Upload/<series>/`.
 2. Drop it into your server's `plugins/` folder.
 3. Restart the server (Paper or Purpur).
 
@@ -139,7 +139,7 @@ Switch the server to English: set `language: en_us` in `config.yml`, then:
 
 ```bash
 ./gradlew build                # standard jar (build/libs)
-./gradlew buildAllVersions     # one jar per supported version into build/libs/Upload/<version>/
+./gradlew buildAllVersions     # one jar per version series into build/libs/Upload/<series>/
 ```
 
 Requires JDK 21 and JDK 25 (the latter only for the 26.x target).

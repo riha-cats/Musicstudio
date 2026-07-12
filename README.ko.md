@@ -21,15 +21,15 @@
 
 ## 지원 버전
 
-마인크래프트 버전별 빌드가 `build/libs/Upload/<버전>/` 에 따로 제공됩니다. 각 JAR은 **Paper와 Purpur 모두**에서 동작합니다.
+버전 시리즈별로 JAR 하나가 `build/libs/Upload/<시리즈>/` 에 제공됩니다. 각 JAR은 **Paper와 Purpur 모두**에서 동작합니다.
 
-| 시리즈 | 버전 |
-|--------|------|
-| 1.20.x | 1.20, 1.20.1, 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6 |
-| 1.21.x | 1.21, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11 |
-| 26.x   | 26.1.2 |
+| 폴더 | 지원 서버 버전 |
+|------|----------------|
+| `1.20` | 1.20 – 1.20.6 (1.20.x 전체) |
+| `1.21` | 1.21 – 1.21.11 (1.21.x 전체) |
+| `26.1.2` | 26.1.2 전용 |
 
-> 1.20–1.20.4는 Java 17, 1.20.5 이상은 Java 21, 26.x는 Java 25가 필요합니다 — 서버 자체 요구사항과 동일합니다.
+> Java 요구사항은 서버를 따릅니다: 1.20–1.20.4는 Java 17, 1.20.5 이상은 Java 21, 26.x는 Java 25.
 
 ## 권한
 
@@ -131,7 +131,7 @@ Note Block Studio 파일 임포트 (`plugins/MusicStudio/import/song.nbs`):
 
 ## 설치
 
-1. `build/libs/Upload/<버전>/` 에서 사용 중인 마인크래프트 버전에 맞는 JAR을 고릅니다.
+1. `build/libs/Upload/<시리즈>/` 에서 사용 중인 마인크래프트 버전 시리즈에 맞는 JAR을 고릅니다.
 2. 서버의 `plugins/` 폴더에 넣습니다.
 3. 서버(Paper 또는 Purpur)를 재시작합니다.
 
@@ -139,7 +139,7 @@ Note Block Studio 파일 임포트 (`plugins/MusicStudio/import/song.nbs`):
 
 ```bash
 ./gradlew build                # 표준 jar (build/libs)
-./gradlew buildAllVersions     # 버전별 jar을 build/libs/Upload/<버전>/ 에 생성
+./gradlew buildAllVersions     # 시리즈별 jar을 build/libs/Upload/<시리즈>/ 에 생성
 ```
 
 JDK 21과 JDK 25가 필요합니다(JDK 25는 26.x 타깃에만 사용).

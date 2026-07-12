@@ -78,46 +78,27 @@ tasks {
     }
 }
 
-// 멀티버전 빌드 매트릭스
-// 하나의 소스를 각 paper-api 버전에 대해 컴파일하고, plugin.yml의 api-version을 버전에 맞춰
-// 주입한 뒤 build/libs/Upload/<마크버전>/ 에 JAR을 만든다. 각 JAR은 Paper/Purpur 공용
-// (Purpur는 Paper 포크라 Paper API JAR이 그대로 동작; 이 플러그인은 Purpur 전용 API 미사용)
+// 멀티버전 빌드 매트릭스 (시리즈 단위)
+// 시리즈별 최소 paper-api 로 컴파일하면 같은 시리즈의 상위 패치버전에서 전부 동작한다
+// (Bukkit API 는 하위 호환. 버전별 API 차이는 ItemCompat 리플렉션 셈이 흡수)
+// 폴더 구성 :: Upload/1.20 = 1.20~1.20.6 지원, Upload/1.21 = 1.21~1.21.11 지원,
+//              Upload/26.1.2 = 26.1.2 전용. 각 JAR 은 Paper/Purpur 공용
+// (Purpur 는 Paper 포크라 Paper API JAR 이 그대로 동작; 이 플러그인은 Purpur 전용 API 미사용)
 //
-// release : 산출 바이트코드(서버 최소 Java). 1.20~1.20.4=Java17, 1.20.5+=Java21
-// jdk     : 컴파일에 쓸 JDK. 26.x paper-api는 Java25 바이트코드라 JDK25로만 읽힌다
+// release : 산출 바이트코드(시리즈 최소 서버 Java). 1.20.x=Java17, 1.21.x=Java21
+// jdk     : 컴파일에 쓸 JDK. 26.x paper-api 는 Java25 바이트코드라 JDK25로만 읽힌다
 data class Target(
-    val label: String,       // 폴더명 = 마인크래프트 버전
-    val coord: String,       // paper-api 의존 좌표
+    val label: String,       // 폴더명 = 지원 시리즈
+    val coord: String,       // paper-api 의존 좌표 (시리즈 최소 버전)
     val apiVersion: String,  // plugin.yml api-version
     val release: Int,        // 출력 바이트코드 버전
     val jdk: Int             // 컴파일 JDK 툴체인
 )
 
 val targets = listOf(
-    Target("1.20",    "io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT",     "1.20", 17, 21),
-    Target("1.20.1",  "io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT",   "1.20", 17, 21),
-    Target("1.20.2",  "io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT",   "1.20", 17, 21),
-    Target("1.20.3",  "io.papermc.paper:paper-api:1.20.3-R0.1-SNAPSHOT",   "1.20", 17, 21),
-    Target("1.20.4",  "io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT",   "1.20", 17, 21),
-    // 1.20.5 paper-api POM이 삭제된 adventure-bom:4.17.0-SNAPSHOT를 import해 해소 불가
-    // POM 파싱 단계라 dependencySubstitution이 못 잡으므로, API 호환 이웃(1.20.6, 동일 api-version
-    // 1.20·동일 Java21)의 헤더로 컴파일한다. 결과 JAR은 1.20.5 서버에서 정상 동작
-    Target("1.20.5",  "io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT",   "1.20", 21, 21),
-    Target("1.20.6",  "io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT",   "1.20", 21, 21),
-    Target("1.21",    "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT",     "1.21", 21, 21),
-    Target("1.21.1",  "io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    Target("1.21.3",  "io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    Target("1.21.4",  "io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    Target("1.21.5",  "io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    Target("1.21.6",  "io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    Target("1.21.7",  "io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    Target("1.21.8",  "io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT",   "1.21", 21, 21),
-    // 1.21.9 paper-api POM이 삭제된 adventure-bom:4.25.0-SNAPSHOT를 import해 해소 불가
-    // API 호환 이웃(1.21.10)의 헤더로 컴파일한다(동일 api-version 1.21·동일 Java21)
-    Target("1.21.9",  "io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT",  "1.21", 21, 21),
-    Target("1.21.10", "io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT",  "1.21", 21, 21),
-    Target("1.21.11", "io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT",  "1.21", 21, 21),
-    Target("26.1.2",  "io.papermc.paper:paper-api:26.1.2.build.69-stable", "1.21", 21, 25),
+    Target("1.20",   "io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT",     "1.20", 17, 21),
+    Target("1.21",   "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT",     "1.21", 21, 21),
+    Target("26.1.2", "io.papermc.paper:paper-api:26.1.2.build.69-stable", "1.21", 21, 25),
 )
 
 val uploadRoot = layout.buildDirectory.dir("libs/Upload")
