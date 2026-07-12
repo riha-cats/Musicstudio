@@ -14,6 +14,12 @@ editor:
   info:
     name: "<light_purple>♪ <song>"
     lore: ["<gray>Tempo: <tempo> ticks/cell", "<gray>Length: <length> cells / <notes> notes", "<gray>Layers: <layers> / <max_layers>", "<aqua>New note: <key_name>", "<aqua>Selected ticks: <selected_ticks> · Range start: <anchor_tick>"]
+  ruler:
+    name: "<gray>Tick <tick>"
+    lore: ["<gray>Click: mark this ruler position", "<gray>This is not used for copy or paste"]
+  ruler-cursor:
+    name: "<yellow>▼ Tick <tick> (ruler marker)"
+    lore: ["<gray>Currently marked ruler position", "<gray>Paste uses the hovered editor cell", "<gray>Click again to clear"]
   ruler-anchor:
     name: "<gold>◆ Tick <tick> (range start)"
     lore: ["<gray>Press F on another editor cell to finish", "<gray>Press Q on an editor cell to cancel only the start"]

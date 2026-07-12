@@ -68,12 +68,13 @@ editor:
   ruler:
     name: "<gray>틱 <tick>"
     lore:
-      - "<gray>클릭: 이 틱에 커서 놓기"
-      - "<gray>커서는 복사/붙여넣기의 기준 위치"
+      - "<gray>클릭: 이 틱에 눈금 위치 표시"
+      - "<gray>복사와 붙여넣기에는 사용되지 않습니다"
   ruler-cursor:
-    name: "<yellow>▼ 틱 <tick> (커서)"
+    name: "<yellow>▼ 틱 <tick> (눈금 표시)"
     lore:
-      - "<gray>복사/붙여넣기 기준 위치"
+      - "<gray>현재 표시한 눈금 위치"
+      - "<gray>붙여넣기는 마우스를 올린 편집 셀이 기준입니다"
       - "<gray>다시 클릭하면 해제"
   ruler-playing:
     name: "<green>▶ 틱 <tick>"
