@@ -408,14 +408,11 @@ public final class GuiManager {
         int tickCount = session.selectedTicks().size();
 
         msg.send(player, "editor.copy-success",
-                "tick", String.valueOf(first),
-                "count", String.valueOf(noteCount),
-
                 "ticks", String.valueOf(tickCount),
                 "notes", String.valueOf(noteCount),
                 "from", String.valueOf(first),
                 "to", String.valueOf(last));
-            }
+    }
 
     private void doPaste(Player player, EditorSession session, int base) {
         if (!session.hasClipboard()) {

@@ -43,4 +43,36 @@ class LocalizedConfigFallbackTest {
         assertEquals("생성 완료", reloaded.getString("command.create-success"));
         assertEquals(2, reloaded.getInt("config-version"));
     }
+
+    // 뜻이 바뀐 키는 copyDefaults 로는 못 고친다. migrate 가 먼저 지워줘야 새 문장이 들어온다
+    @Test
+    void migrateClearsChangedKeySoDefaultsCanRefill() throws InvalidConfigurationException {
+        String stale = "틱 <white><tick></white>의 노트 <white><count></white>개를 복사했습니다.";
+        String fresh = "선택한 <white><ticks></white>틱에서 노트 <white><notes></white>개를 복사했습니다. (<from>~<to>)";
+
+        // [0] :: 정본(ko_kr) — copy-success 가 단일 틱에서 범위 복사로 바뀐 상태
+        YamlConfiguration canonical = new YamlConfiguration();
+        canonical.set("config-version", 5);
+        canonical.set("editor.copy-success", fresh);
+
+        // [1] :: 기존 서버에 깔려 있는 파일 — 버전 4, 단일 틱 시절 문장이 그대로다
+        YamlConfiguration onDisk = new YamlConfiguration();
+        onDisk.set("config-version", 4);
+        onDisk.set("editor.copy-success", stale);
+
+        // [2] :: migrate 없이 copyDefaults 만? 키가 이미 있으니 옛 문장이 살아남는다 (이 버그의 정체)
+        YamlConfiguration without = new YamlConfiguration();
+        without.loadFromString(onDisk.saveToString());
+        without.setDefaults(canonical);
+        without.options().copyDefaults(true);
+        assertEquals(stale, without.getString("editor.copy-success"));
+
+        // [3] :: migrate 가 키를 지운 뒤라면? 정본의 새 문장이 채워진다
+        YamlConfiguration with = new YamlConfiguration();
+        with.loadFromString(onDisk.saveToString());
+        with.set("editor.copy-success", null);
+        with.setDefaults(canonical);
+        with.options().copyDefaults(true);
+        assertEquals(fresh, with.getString("editor.copy-success"));
+    }
 }

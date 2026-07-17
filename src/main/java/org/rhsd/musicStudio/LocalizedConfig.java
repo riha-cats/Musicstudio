@@ -93,9 +93,12 @@ public abstract class LocalizedConfig {
             }
         }
         if (base.equals("messages") && fromVersion < 5 && toVersion >= 5) {
+            // copy-success 는 단일 틱에서 범위 복사로 뜻이 바뀌어 플레이스홀더가 통째로 교체됐다.
+            // copyDefaults 는 없는 키만 채우므로, 뜻이 바뀐 키는 여기서 지워야 새 문장이 들어온다
             for (String path : List.of(
                     "editor.layer-move-selected", "editor.layer-move-cancelled",
-                    "editor.layer-moved", "editor.layer-move-invalid")) {
+                    "editor.layer-moved", "editor.layer-move-invalid",
+                    "editor.copy-success")) {
                 loaded.set(path, null);
             }
         }
