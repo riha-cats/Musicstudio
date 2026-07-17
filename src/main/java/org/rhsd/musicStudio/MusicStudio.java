@@ -10,6 +10,7 @@ import org.rhsd.musicStudio.disc.DiscManager;
 import org.rhsd.musicStudio.gui.GuiListener;
 import org.rhsd.musicStudio.gui.GuiManager;
 import org.rhsd.musicStudio.integration.ItemsAdderHook;
+import org.rhsd.musicStudio.integration.VaultHook;
 import org.rhsd.musicStudio.playback.PlaybackManager;
 import org.rhsd.musicStudio.storage.SongStorage;
 import org.rhsd.musicStudio.update.UpdateChecker;
@@ -51,7 +52,8 @@ public final class MusicStudio extends JavaPlugin {
         // [3] :: 매니저 조립
         playbackManager = new PlaybackManager(this);
         ItemsAdderHook itemsAdder = new ItemsAdderHook(this);
-        discManager = new DiscManager(this, guiConfig, itemsAdder);
+        VaultHook vault = new VaultHook(this);
+        discManager = new DiscManager(this, guiConfig, itemsAdder, vault);
         guiManager = new GuiManager(this, songStorage, discManager, messageManager, guiConfig);
 
         // [4] :: 리스너 등록

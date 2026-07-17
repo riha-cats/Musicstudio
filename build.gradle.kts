@@ -1,3 +1,4 @@
+import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
@@ -10,6 +11,8 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    // Vault 는 중앙 저장소에 없어 jitpack 에서 API 잔짐만 받는다 (compileOnly)
+    maven("https://jitpack.io")
 }
 
 // 일부 paper-api 스냅샷은 papermc 저장소에서 이미 정리된 adventure(net.kyori) SNAPSHOT를
@@ -36,9 +39,15 @@ val primaryApi = "io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT"
 // 이를 transitive로 노출하지 않으므로(26.x는 미노출) 명시적 compileOnly 의존으로 고정한다
 val jetbrainsAnnotations = "org.jetbrains:annotations:24.1.0"
 
+// Vault economy 선택 연동. compileOnly 라 런타임 의존이 아니며(Vault 없으면 안 씀),
+// VaultHook 한 클래스에만 타입이 갇혀 미설치 서버에서도 깨지지 않는다.
+// 옛 bukkit 을 transitive 로 끌어오지 않도록 잔짐만 받는다 (bukkit 은 paper-api 가 제공)
+val vaultApi = "com.github.MilkBowl:VaultAPI:1.7"
+
 dependencies {
     compileOnly(primaryApi)
     compileOnly(jetbrainsAnnotations)
+    compileOnly(vaultApi) { isTransitive = false }
 
     // 테스트: 순수 로직(MiniMessage 파싱, italic, 플레이스홀더, 음높이 계산) 검증
     testImplementation(primaryApi)
@@ -119,6 +128,8 @@ for (t in targets) {
     }
     dependencies.add(api.name, t.coord)
     dependencies.add(api.name, jetbrainsAnnotations)
+    // VaultHook 가 main 소스에 있어 모든 타깃이 컴파일한다. Vault 타입을 각 타깃 클래스패스에도 올린다
+    (dependencies.add(api.name, vaultApi) as? ModuleDependency)?.isTransitive = false
 
     val classesDir = layout.buildDirectory.dir("matrix/${t.label}/classes")
     val resourcesDir = layout.buildDirectory.dir("matrix/${t.label}/resources")

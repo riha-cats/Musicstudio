@@ -255,7 +255,12 @@ public final class MsCommand implements CommandExecutor {
             return;
         }
         // [5] :: 추출 비용을 낼 수 있는가?
-        if (!discManager.takeCost(player)) {
+        DiscManager.CostResult cost = discManager.takeCost(player);
+        if (cost == DiscManager.CostResult.PROVIDER_MISSING) {
+            msg.send(sender, "command.disc-cost-economy-unavailable");
+            return;
+        }
+        if (cost == DiscManager.CostResult.INSUFFICIENT) {
             msg.send(sender, "command.disc-cost-insufficient", discManager.costPlaceholders());
             return;
         }

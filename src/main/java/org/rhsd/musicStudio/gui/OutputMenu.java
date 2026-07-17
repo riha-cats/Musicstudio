@@ -68,8 +68,7 @@ public final class OutputMenu implements MsHolder {
         inv.clear();
         String[] ph = {
                 "song", song.name(),
-                "item", discs.costItemMaterial().name(),
-                "amount", String.valueOf(discs.costAmount()),
+                "cost", discs.costLabel(),
                 "length", String.valueOf(song.length()),
                 "notes", String.valueOf(song.noteCount()),
                 "layers", String.valueOf(song.layerCount())

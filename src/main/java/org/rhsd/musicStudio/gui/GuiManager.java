@@ -417,14 +417,22 @@ public final class GuiManager {
                 && !player.hasPermission(MsCommand.PERM_ADMIN)) {
             msg.send(player, "command.disc-not-owner");
         }
-        // [3] :: 추출 비용이 부족한가?
-        else if (!discManager.takeCost(player)) {
-            msg.send(player, "command.disc-cost-insufficient", discManager.costPlaceholders());
-        }
-        // [4] PASSED :: 음반 지급
+        // [3] :: 추출 비용을 낼 수 있는가?
         else {
-            discManager.giveDisc(player, song);
-            msg.send(player, "editor.disc-extracted", "name", song.name());
+            DiscManager.CostResult cost = discManager.takeCost(player);
+            // [A] :: economy 설정인데 프로바이더가 없음 (Vault/돈 플러그인 미설치)
+            if (cost == DiscManager.CostResult.PROVIDER_MISSING) {
+                msg.send(player, "command.disc-cost-economy-unavailable");
+            }
+            // [B] :: 비용이 부족함
+            else if (cost == DiscManager.CostResult.INSUFFICIENT) {
+                msg.send(player, "command.disc-cost-insufficient", discManager.costPlaceholders());
+            }
+            // [C] PASSED :: 음반 지급
+            else {
+                discManager.giveDisc(player, song);
+                msg.send(player, "editor.disc-extracted", "name", song.name());
+            }
         }
         // [STOP] :: 추출 끝
     }

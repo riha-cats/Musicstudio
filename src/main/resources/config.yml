@@ -1,44 +1,63 @@
-# =================================================================
-# MusicStudio 설정
-# =================================================================
-config-version: 5
+# ___  ___          _      _____ _             _ _
+# |  \/  |         (_)    /  ___| |           | (_)
+# | .  . |_   _ ___ _  ___\ `--.| |_ _   _  __| |_  ___
+# | |\/| | | | / __| |/ __|`--. \ __| | | |/ _` | |/ _ \
+# | |  | | |_| \__ \ | (__/\__/ / |_| |_| | (_| | | (_) |
+# \_|  |_/\__,_|___/_|\___\____/ \__|\__,_|\__,_|_|\___/
+#
+#
 
-# 메시지/GUI 언어. 텍스트는 language/<언어>.yml 에 있고, 관리자 수정은 messages.yml 에 얹는다
-# 기본 제공: ko_kr(한국어), en_us(영어 — 미번역 문구는 ko_kr로 자동 폴백)
+# >>> DO NOT modify the config-version below manually! <<<
+config-version: 5
+# >>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+# Changing the language type below switches the language syntax.
+# Supported language codes: ko_kr, en_us
 language: ko_kr
 
-# 업데이트 확인. 서버 시작/리로드 시 GitHub 최신 릴리스와 비교해
-# 새 버전이 있으면 콘솔과 관리자(musicstudio.admin)에게 알린다
+# When enabled, MusicStudio checks for updates on server startup.
+# If an update is available, admins will be notified in the server
+# console and upon login.
 update-check:
   enabled: true
 
 limits:
-  # 곡 최대 길이(셀). 그리드 가로 무한 확장을 막는다
+  # Sets the maximum song length in ticks (per cell). (Default: 4096)
   max-ticks: 4096
-  # 플레이어당 만들 수 있는 곡 개수 상한. musicstudio.admin 권한자는 면제
+  # Sets the maximum number of songs a player can create.
+  # Players with musicstudio.admin are exempt from this limit.
   max-songs-per-player: 30
-  # 곡당 레이어(트랙) 최대 개수. 1~256까지 (노트 키가 레이어를 8비트에 담아 256이 한계)
+  # Sets the maximum number of layers per song. Max: 256. (Default: 9)
   max-layers: 9
 
 disc:
-  # 음반 베이스 아이템(바닐라 뮤직디스크). itemsadder-id가 비어있을 때 사용
-  # 디스크가 제 곡명("C418 - strad")을 그리는 툴팁은 추출 시 자동으로 지워진다
+  # Sets the base item for the music disc.
+  # Used by default when disc.itemsadder-id is empty.
   material: MUSIC_DISC_STRAD
 
-  # ItemsAdder 커스텀 아이템 id (예: "myitems:music_disc"). 비워두면 위 material 사용
-  # ItemsAdder가 설치되어 있지 않거나 id를 찾지 못하면 자동으로 material로 폴백한다
+  # Uses the ItemsAdder custom item ID.
+  # Used by default when disc.material is empty.
+  # If ItemsAdder is not installed or the ID cannot be found,
+  # it automatically falls back to material.
   itemsadder-id: ""
 
-  # 바닐라 속성 (ItemsAdder 아이템을 쓰면 보통 불필요)
-  # 인챈트 반짝임 효과
+
+  # Vanilla item properties
+  # Enchantment glint effect
   glint: false
-  # 내구도 무한 (도구류에만 의미 있음, 음반엔 시각 효과 없음)
+  # Unbreakable (infinite durability)
   unbreakable: false
-  # 리소스팩 커스텀 모델/텍스처 ID. 0이면 미적용, 양수면 적용
+  # Applies the resource pack's custom model/texture ID.
+  # 0 disables it; any positive value applies it. (Default: 0)
   custom-model-data: 0
 
-  # 음반 추출 비용(아이템 소모). enabled: false 이면 무료
+  # Cost to extract a music disc. If set to false, extraction is free.
   cost:
     enabled: false
+    # If type is ITEM, an item will be consumed.
+    # If type is ECONOMY, money will be deducted via Vault integration.
+    type: ITEM
+    # Item to consume when type is ITEM
     item: EMERALD
+    # Amount if type is ITEM, or price if type is ECONOMY
     amount: 5
