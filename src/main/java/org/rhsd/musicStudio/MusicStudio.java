@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 // =================================================================
 public final class MusicStudio extends JavaPlugin {
 
+    private LanguageStore languageStore;
     private MessageManager messageManager;
     private GuiConfig guiConfig;
     private SongStorage songStorage;
@@ -38,9 +39,10 @@ public final class MusicStudio extends JavaPlugin {
         saveDefaultConfig();
         migrateConfig();
 
-        // [1] :: 텍스트 로더. config 의 language 를 보고 로케일 파일을 고른다
-        messageManager = new MessageManager(this);
-        guiConfig = new GuiConfig(this);
+        // [1] :: 텍스트 로더. 정본, 현재 언어, 관리자 override 를 겹쳐 한 번만 읽고 둘이 나눠 본다
+        languageStore = new LanguageStore(this);
+        messageManager = new MessageManager(languageStore);
+        guiConfig = new GuiConfig(languageStore);
 
         // [2] :: 곡 데이터 로드
         songStorage = new SongStorage(this);
@@ -91,8 +93,7 @@ public final class MusicStudio extends JavaPlugin {
     public void reloadAll() {
         reloadConfig();
         migrateConfig();
-        messageManager.reload();
-        guiConfig.reload();
+        languageStore.reload();
         discManager.reload();
         songStorage.loadAll();
         updateChecker.check();

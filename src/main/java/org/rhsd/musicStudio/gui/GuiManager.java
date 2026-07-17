@@ -155,7 +155,7 @@ public final class GuiManager {
         // [3] :: 목록을 띄운 뒤에 지워졌을 수 있으니 id 로 다시 조회한다
         Song song = storage.getById(songId);
         if (song == null) {
-            msg.send(player, "command.song-not-found", "name", "-");
+            msg.send(player, "editor.song-gone");
             SongListMenu.render(menu.getInventory(), menu, gui, storage);
             return;
         }

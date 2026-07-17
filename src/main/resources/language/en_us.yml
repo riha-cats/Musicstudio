@@ -1,0 +1,138 @@
+# =================================================================
+# MusicStudio 언어 파일 (en_us)
+# =================================================================
+# 이 파일은 플러그인이 켜질 때마다 덮어씁니다. 여기를 고치면 사라집니다
+# 문구를 바꾸려면 messages.yml 에 바꿀 키만 적으세요
+# 활성 언어는 config.yml 의 language 로 고릅니다
+# 전부 MiniMessage 문법입니다
+
+messages:
+  prefix: "<light_purple>[MusicStudio]</light_purple> "
+
+  no-permission: "<red>You don't have permission."
+  player-only: "<red>Players only."
+
+  editor:
+    layer-move-selected: "<yellow>Selected the layer currently at position <white><layer></white>. Press F on a destination layer header."
+    layer-move-cancelled: "<gray>Cancelled moving the layer at position <white><layer></white>."
+    layer-moved: "<green>Moved the layer from position <white><from></white> to <white><to></white>."
+    layer-move-invalid: "<red>That layer move is no longer valid."
+    range-start: "<yellow>Tick <white><anchor_tick></white> is now the range start; it persists while scrolling."
+    range-cancelled: "<gray>Cancelled the pending range start; completed selection was preserved."
+    range-added: "<green>Added ticks <white><from>~<to></white> (<affected> ticks). <white><total></white> ticks selected."
+    range-removed: "<yellow>Removed ticks <white><from>~<to></white> (<affected> ticks). <white><total></white> ticks selected."
+    selection-cleared: "<gray>Cleared the completed tick selection and pending range start."
+    copy-no-selection: "<red>Nothing selected. Shift+left click editor cells to pick a range."
+    copy-no-notes: "<gray>The selected ticks contain no notes; the existing clipboard was preserved."
+    copy-success: "<green>Copied <white><notes></white> notes from <white><ticks></white> selected ticks (<from>~<to>)."
+    paste-target-set: "<aqua>Paste target set to tick <white><tick></white>. Now press Paste."
+    paste-target-cleared: "<gray>Paste target cleared."
+    paste-no-target: "<red>No paste target. Click a tick banner below to pick the spot first."
+    tempo-reset: "<aqua>Tempo reset to the default (<white><tempo></white> ticks/cell)."
+    song-gone: "<red>That song no longer exists. The list has been refreshed."
+    paste-empty: "<gray>The clipboard is empty. Copy a selection first."
+    paste-result: "<green>At tick <white><tick></white>: pasted <white><pasted></white>, skipped <white><skipped></white>."
+
+gui:
+  editor:
+    header:
+      name: "<white>Layer <n>"
+      name-muted: "<dark_gray>Layer <n>"
+      name-moving: "<gold>Moving layer <n>"
+      lore: ["<white>Current position: <n> / <total>", "<gray>Instrument: <instrument>", "<gray>Volume: <volume>%<muted>", "", "<yellow>Left: change instrument", "<yellow>Right: toggle mute", "<yellow>Shift+Left/Right: volume ±10%", "<aqua>F: select this layer to move / move the selected layer here", "<red>Q (drop): delete layer"]
+      lore-moving: ["<gold>Moving layer <n>", "<white>Current position: <n> / <total>", "<gray>Press F on another layer header to move here", "<gray>Press F again on this header to cancel"]
+    # <song>
+    title: "<light_purple>♪ <song>"
+    empty-cell:
+      name: "<dark_gray>·"
+      lore: ["<dark_gray>Tick <tick> / Layer <layer>", "<gray>Left click: create <key_name>", "<aqua>Shift+left click: range start/end"]
+    note:
+      lore: ["<aqua>Note: <key_name> (key <key>)", "<gray>Tick <tick> / Layer <layer>", "", "<yellow>Left click: select (copies this pitch)", "<yellow>Right click: +1 / Shift+right: -1", "<aqua>Shift+left click: range start/end", "<red>Q (drop): delete"]
+    info:
+      name: "<light_purple>♪ <song>"
+      lore: ["<gray>Tempo: <tempo> ticks/cell", "<gray>Length: <length> cells / <notes> notes", "<gray>Layers: <layers> / <max_layers>", "<aqua>New note: <key_name>", "<aqua>Selected ticks: <selected_ticks> · Range start: <anchor_tick>"]
+    ruler:
+      name: "<white>Tick <tick>"
+      lore: ["<gray>Click: paste here (turns blue)", "<dark_gray>Shift+left click editor cells to select"]
+    ruler-paste:
+      name: "<aqua>▼ Tick <tick> (paste here)"
+      lore: ["<gray>The Paste button lands here", "<dark_gray>Click again to clear"]
+    ruler-selected:
+      name: "<yellow>■ Tick <tick> (selected)"
+      lore: ["<gray>Copy will take this tick", "<dark_gray>Right click Copy to clear all"]
+    ruler-anchor:
+      name: "<gold>◆ Tick <tick> (range start — waiting for end)"
+      lore: ["<gray>Shift+left click another editor cell to select everything between", "<dark_gray>Right click Copy to cancel"]
+    buttons:
+      copy:
+        name: "<white>Copy"
+        lore: ["<gray>Copies the selected cells", "<gray>Right click: clear the whole selection", "<dark_gray>Shift+left click twice on cells to pick a range", "<gray><selected_ticks> ticks selected · pending start <anchor_tick>"]
+      paste:
+        name: "<white>Paste"
+        lore: ["<gray>Lands on the blue banner", "<aqua>Paste tick: <paste_tick>", "<dark_gray>Click a tick banner to pick the spot"]
+      output:
+        name: "<light_purple>Extract disc"
+        lore: ["<gray>Opens the extract menu", "<dark_gray>Check the price, then decide"]
+      play:
+        name: "<green>▶ Preview"
+        lore: ["<gray>Only you hear it", "<gray>Press again to stop"]
+      stop:
+        name: "<red>■ Stop"
+        lore: ["<gray>Stops the preview"]
+      settings:
+        name: "<gold>Settings"
+        lore: ["<gray>Tempo"]
+
+  settings:
+    title: "<gold>Settings — <song>"
+    filler:
+      name: "<dark_gray> "
+    info:
+      name: "<light_purple>♪ <song>"
+      lore: ["<gray>Tempo: <tempo> ticks/cell (<cells_per_sec> cells/s)", "<gray>Length: <length> cells / <notes> notes", "<gray>Layers: <layers>"]
+    tempo-down:
+      name: "<red>◀ Slower"
+      lore: ["<gray>+1 tick per cell", "<gray>Now: <tempo> ticks/cell", "<gray>Max <max>"]
+    tempo-up:
+      name: "<green>Faster ▶"
+      lore: ["<gray>-1 tick per cell", "<gray>Now: <tempo> ticks/cell", "<gray>Min <min>"]
+    tempo-reset:
+      name: "<aqua>Reset tempo"
+      lore: ["<gray>Back to <default> ticks/cell", "<gray>Now: <tempo> ticks/cell"]
+    back:
+      name: "<yellow>← Back to editor"
+      lore: ["<gray>Return to the editor"]
+
+  output:
+    title: "<light_purple>Extract disc — <song>"
+    filler:
+      name: "<dark_gray> "
+    price:
+      name: "<gold>Price: <item> x<amount>"
+      lore: ["<gray>What it costs to press this song", "<gray><length> cells · <notes> notes · <layers> layers"]
+    price-free:
+      name: "<gold>Price: free"
+      lore: ["<gray>This server charges nothing", "<gray><length> cells · <notes> notes · <layers> layers"]
+    buy:
+      name: "<green>Extract"
+      lore: ["<gray>Click to receive the disc", "<dark_gray>Anyone holding it can play it"]
+    back:
+      name: "<yellow>← Back to editor"
+      lore: ["<gray>Leave without extracting"]
+
+  song-list:
+    title: "<dark_purple>♪ Music Studio"
+    border:
+      name: "<dark_gray> "
+    entry:
+      name: "<light_purple><bold>♪ <song>"
+      lore: ["<yellow>▌ Left click to open", "<gray>▌", "<gray>▌ Size: <size>", "<gray>▌ Notes: <notes>"]
+    page-info:
+      name: "<aqua>Page <page> / <pages>"
+      lore: ["<gray><total> songs"]
+    prev-page:
+      name: "<aqua>◀ Previous page"
+      lore: ["<gray>Page <page> / <pages>"]
+    next-page:
+      name: "<aqua>Next page ▶"
+      lore: ["<gray>Page <page> / <pages>"]
