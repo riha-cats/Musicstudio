@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from gui_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 5
+config-version: 6
 
 editor:
   header:
@@ -53,3 +53,23 @@ editor:
     settings:
       name: "<gold>Settings"
       lore: ["<gray>Tempo"]
+
+settings:
+  title: "<gold>Settings — <song>"
+  filler:
+    name: "<dark_gray> "
+  info:
+    name: "<light_purple>♪ <song>"
+    lore: ["<gray>Tempo: <tempo> ticks/cell (<cells_per_sec> cells/s)", "<gray>Length: <length> cells / <notes> notes", "<gray>Layers: <layers>"]
+  tempo-down:
+    name: "<red>◀ Slower"
+    lore: ["<gray>+1 tick per cell", "<gray>Now: <tempo> ticks/cell", "<gray>Max <max>"]
+  tempo-up:
+    name: "<green>Faster ▶"
+    lore: ["<gray>-1 tick per cell", "<gray>Now: <tempo> ticks/cell", "<gray>Min <min>"]
+  tempo-reset:
+    name: "<aqua>Reset tempo"
+    lore: ["<gray>Back to <default> ticks/cell", "<gray>Now: <tempo> ticks/cell"]
+  back:
+    name: "<yellow>← Back to editor"
+    lore: ["<gray>Return to the editor"]

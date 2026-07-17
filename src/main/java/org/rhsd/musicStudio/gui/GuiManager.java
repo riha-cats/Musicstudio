@@ -21,6 +21,7 @@ import org.rhsd.musicStudio.storage.SongStorage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -38,8 +39,14 @@ public final class GuiManager {
     private final MessageManager msg;
     private final GuiConfig gui;
 
+    // 클릭한 그 틱에 곧바로 인벤토리를 열면, 누르고 있던 클릭이 새 GUI 의 같은 자리로 넘어가
+    // 엉뚱한 버튼이 눌린다. 몇 틱 뒤에 열어 클릭이 소진되기를 기다린다
+    private static final long GUI_SWITCH_DELAY = 3L;
+
     private final Map<UUID, EditorSession> sessions = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> previews = new ConcurrentHashMap<>();
+    // 아직 안 열린 지연 오픈 예약. 기다리는 중에 플레이어가 닫아버리면 취소해야 한다
+    private final Map<UUID, BukkitTask> pendingOpen = new ConcurrentHashMap<>();
 
     public GuiManager(MusicStudio plugin, SongStorage storage, DiscManager discManager,
                       MessageManager msg, GuiConfig gui) {
@@ -82,24 +89,58 @@ public final class GuiManager {
     }
 
     private void reopenEditor(Player player, EditorSession session) {
-        player.openInventory(EditorRenderer.build(session, gui));
+        openLater(player, () -> EditorRenderer.build(session, gui));
     }
 
     // 인벤토리 닫힘 처리. 다음 틱에 확인 후 세션 정리 또는 유지
+    // 지연 오픈 :: 클릭이 새 GUI 로 새어나가지 않도록 몇 틱 뒤에 연다.
+    // 예약을 들고 있어야, 기다리는 사이에 플레이어가 닫았을 때 취소할 수 있다
+    private void openLater(Player player, Supplier<Inventory> builder) {
+        UUID uuid = player.getUniqueId();
+        cancelPendingOpen(uuid);
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            // 예약을 먼저 걷는다. 아래 openInventory 가 부르는 닫힘 이벤트가
+            // 이 예약을 "사용자가 닫은 것"으로 오해하지 않게 하기 위한 순서다
+            pendingOpen.remove(uuid);
+            // [1] :: 기다리는 사이에 나갔는가? 세션을 정리하고 끝낸다
+            if (!player.isOnline()) {
+                closeSession(uuid);
+                return;
+            }
+            player.openInventory(builder.get());
+        }, GUI_SWITCH_DELAY);
+        pendingOpen.put(uuid, task);
+    }
+
+    private void cancelPendingOpen(UUID uuid) {
+        BukkitTask pending = pendingOpen.remove(uuid);
+        if (pending != null) {
+            pending.cancel();
+        }
+    }
+
+    // 세션 제거 + 곡 저장. 닫힘 처리와 지연 오픈 실패 경로가 함께 쓴다
+    private void closeSession(UUID uuid) {
+        EditorSession session = sessions.remove(uuid);
+        if (session != null) {
+            storage.saveAsync(session.song());
+        }
+    }
+
     public void onInventoryClose(Player player) {
         stopPreview(player);
         UUID uuid = player.getUniqueId();
+        // [0] :: 지연 오픈을 기다리는 중에 닫혔다면? 우리가 연 게 아니라 플레이어가 먼저 닫은 것이다
+        //        (우리 openInventory 가 부른 닫힘이라면 예약은 이미 걷혀 있어 여기서 안 잡힌다)
+        //        예약을 취소하지 않으면 닫은 뒤에 GUI 가 뒤늦게 열린다
+        cancelPendingOpen(uuid);
         Bukkit.getScheduler().runTask(plugin, () -> {
-            // [1] :: 우리 GUI 끼리 전환 중인가? 세션 유지
             Object holder = player.getOpenInventory().getTopInventory().getHolder();
             if (holder instanceof MsHolder) {
                 return;
             }
             // [2] :: 진짜로 닫았다면, 세션 정리 + 곡 저장
-            EditorSession session = sessions.remove(uuid);
-            if (session != null) {
-                storage.saveAsync(session.song());
-            }
+            closeSession(uuid);
         });
     }
 
@@ -108,6 +149,11 @@ public final class GuiManager {
             task.cancel();
         }
         previews.clear();
+        // 아직 안 열린 예약도 걷는다. 안 그러면 종료 중에 인벤토리를 열려 든다
+        for (BukkitTask task : pendingOpen.values()) {
+            task.cancel();
+        }
+        pendingOpen.clear();
     }
 
     // =================================================================
@@ -254,7 +300,7 @@ public final class GuiManager {
             }
             switch (click) {
                 // 좌클릭 :: 악기 변경 메뉴 열기
-                case LEFT -> player.openInventory(InstrumentMenu.build(song, layerIdx, gui));
+                case LEFT -> openLater(player, () -> InstrumentMenu.build(song, layerIdx, gui));
                 // 우클릭 :: 음소거 토글
                 case RIGHT -> {
                     layer.setMuted(!layer.muted());
@@ -357,7 +403,7 @@ public final class GuiManager {
             }
             case EditorRenderer.SLOT_PASTE -> doPaste(player, session);
             // 설정 / 음반 추출
-            case EditorRenderer.SLOT_SETTINGS -> player.openInventory(SettingsMenu.build(session.song(), gui));
+            case EditorRenderer.SLOT_SETTINGS -> openLater(player, () -> SettingsMenu.build(session.song(), gui));
             case EditorRenderer.SLOT_OUTPUT   -> extractDisc(player, session.song());
             default -> {
             }
@@ -489,8 +535,13 @@ public final class GuiManager {
                 song.setTicksPerCell(song.ticksPerCell() - 1);
                 SettingsMenu.render(menu.getInventory(), song, gui);
             }
-            // 음반 추출
-            case SettingsMenu.SLOT_DISC -> extractDisc(player, song);
+            // 템포를 기본값으로
+            case SettingsMenu.SLOT_TEMPO_RESET -> {
+                song.setTicksPerCell(Song.DEFAULT_TICKS_PER_CELL);
+                msg.send(player, "editor.tempo-reset", "tempo",
+                        String.valueOf(Song.DEFAULT_TICKS_PER_CELL));
+                SettingsMenu.render(menu.getInventory(), song, gui);
+            }
             // 에디터로 복귀
             case SettingsMenu.SLOT_BACK -> reopenEditor(player, session);
             default -> {

@@ -131,6 +131,15 @@ public abstract class LocalizedConfig {
                 loaded.set(path, null);
             }
         }
+        // v6 :: 설정 메뉴를 27칸 안에서 재배치했다. 음반 추출은 에디터 Output 버튼으로 옮겨
+        // settings.disc 는 없어졌고, tempo-info 는 info 로 갈렸다
+        if (base.equals("gui") && fromVersion < 6 && toVersion >= 6) {
+            for (String path : List.of(
+                    "settings.disc", "settings.tempo-info",
+                    "settings.tempo-down", "settings.tempo-up", "settings.back")) {
+                loaded.set(path, null);
+            }
+        }
         if (base.equals("messages") && fromVersion < 5 && toVersion >= 5) {
             // copy-success 는 단일 틱에서 범위 복사로 뜻이 바뀌어 플레이스홀더가 통째로 교체됐다.
             // copyDefaults 는 없는 키만 채우므로, 뜻이 바뀐 키는 여기서 지워야 새 문장이 들어온다

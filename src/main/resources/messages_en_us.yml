@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from messages_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 7
+config-version: 8
 
 prefix: "<light_purple>[MusicStudio]</light_purple> "
 
@@ -26,5 +26,6 @@ editor:
   paste-target-set: "<aqua>Paste target set to tick <white><tick></white>. Now press Paste."
   paste-target-cleared: "<gray>Paste target cleared."
   paste-no-target: "<red>No paste target. Click a tick banner below to pick the spot first."
+  tempo-reset: "<aqua>Tempo reset to the default (<white><tempo></white> ticks/cell)."
   paste-empty: "<gray>The clipboard is empty. Copy a selection first."
   paste-result: "<green>At tick <white><tick></white>: pasted <white><pasted></white>, skipped <white><skipped></white>."
