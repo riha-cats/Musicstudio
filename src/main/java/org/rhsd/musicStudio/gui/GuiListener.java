@@ -34,7 +34,7 @@ public final class GuiListener implements Listener {
                 return;
             }
             if (event.getWhoClicked() instanceof Player player) {
-                gui.handleEditorClick(player, event.getRawSlot(), event.getClick(), event.getHotbarButton());
+                gui.handleEditorClick(player, event.getRawSlot(), event.getClick());
             }
         }
         // [B] :: 악기 선택 메뉴인가?

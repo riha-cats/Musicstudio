@@ -13,6 +13,7 @@ import org.rhsd.musicStudio.model.Note;
 import org.rhsd.musicStudio.model.Song;
 
 import java.util.List;
+import java.util.NavigableSet;
 
 // =================================================================
 // 에디터 렌더러
@@ -28,32 +29,35 @@ public final class EditorRenderer {
     public static final int CONTROL_ROW = 5;
 
     public static final int SLOT_PREV_TICK   = 45;
-    public static final int SLOT_NEXT_TICK   = 46;
-    public static final int SLOT_UP_LAYER    = 47;
-    public static final int SLOT_DOWN_LAYER  = 48;
+    public static final int SLOT_COPY        = 46;
+    public static final int SLOT_PASTE       = 47;
+    public static final int SLOT_SETTINGS    = 48;
     public static final int SLOT_PLAY        = 49;
-    public static final int SLOT_STOP        = 50;
-    public static final int SLOT_SETTINGS    = 51;
-    public static final int SLOT_RANGE_HELP  = 52;
-    public static final int SLOT_EDIT_HELP   = 53;
+    public static final int SLOT_OUTPUT      = 50;
+    public static final int SLOT_UP_LAYER    = 51;
+    public static final int SLOT_DOWN_LAYER  = 52;
+    public static final int SLOT_NEXT_TICK   = 53;
     public static final int SLOT_INFO        = 36;
 
     // 컨트롤/장식 아이콘 Material. 텍스트는 GuiConfig 가, 아이콘은 여기서 관리한다
     private static final Material MAT_PREV         = Material.SPECTRAL_ARROW;
     private static final Material MAT_NEXT         = Material.ARROW;
-    private static final Material MAT_LAYER        = Material.FEATHER;
-    private static final Material MAT_PLAY         = Material.LIME_DYE;
-    private static final Material MAT_STOP         = Material.RED_DYE;
-    private static final Material MAT_SETTINGS     = Material.COMPARATOR;
-    private static final Material MAT_HELP         = Material.BOOK;
+    private static final Material MAT_COPY         = Material.WRITTEN_BOOK;
+    private static final Material MAT_PASTE        = Material.BOOK;
+    private static final Material MAT_SETTINGS     = Material.REPEATER;
+    private static final Material MAT_OUTPUT       = Material.MUSIC_DISC_11;
+    private static final Material MAT_LAYER        = Material.PAPER;
+    private static final Material MAT_PLAY         = Material.GREEN_BANNER;
+    private static final Material MAT_STOP         = Material.RED_BANNER;
     private static final Material MAT_EMPTY        = Material.GRAY_STAINED_GLASS_PANE;
     private static final Material MAT_ADD          = Material.LIME_STAINED_GLASS_PANE;
     private static final Material MAT_FILLER       = Material.BLACK_STAINED_GLASS_PANE;
     private static final Material MAT_INFO         = Material.JUKEBOX;
-    private static final Material MAT_RULER        = Material.PAPER;
-    private static final Material MAT_RULER_ON     = Material.LIME_DYE;
-    private static final Material MAT_RULER_CURSOR = Material.YELLOW_DYE;
-    private static final Material MAT_RULER_ANCHOR = Material.ORANGE_DYE;
+    // 틱 눈금 배너 4색 :: 흰=미선택, 노랑=선택됨, 주황=대기 중 시작점, 연두=재생 헤드
+    private static final Material MAT_TICK          = Material.WHITE_BANNER;
+    private static final Material MAT_TICK_SELECTED = Material.YELLOW_BANNER;
+    private static final Material MAT_TICK_ANCHOR   = Material.ORANGE_BANNER;
+    private static final Material MAT_TICK_PLAYING  = Material.LIME_BANNER;
 
     private EditorRenderer() {
     }
@@ -113,26 +117,32 @@ public final class EditorRenderer {
 
         // [3] :: 컨트롤 바 (행5)
         button(inv, SLOT_PREV_TICK, MAT_PREV, gui, "editor.buttons.prev-tick");
-        button(inv, SLOT_NEXT_TICK, MAT_NEXT, gui, "editor.buttons.next-tick");
+        button(inv, SLOT_COPY, MAT_COPY, gui, "editor.buttons.copy", session);
+        button(inv, SLOT_PASTE, MAT_PASTE, gui, "editor.buttons.paste", session);
+        button(inv, SLOT_SETTINGS, MAT_SETTINGS, gui, "editor.buttons.settings");
+        // 재생 버튼은 토글이다. 재생 중이면 빨간 배너(정지)로 바뀌어 현재 상태를 겸해 보여준다
+        boolean playing = session.playingTick() >= 0;
+        button(inv, SLOT_PLAY, playing ? MAT_STOP : MAT_PLAY, gui,
+                playing ? "editor.buttons.stop" : "editor.buttons.play");
+        button(inv, SLOT_OUTPUT, MAT_OUTPUT, gui, "editor.buttons.output");
         button(inv, SLOT_UP_LAYER, MAT_LAYER, gui, "editor.buttons.up-layer");
         button(inv, SLOT_DOWN_LAYER, MAT_LAYER, gui, "editor.buttons.down-layer");
-        button(inv, SLOT_PLAY, MAT_PLAY, gui, "editor.buttons.play");
-        button(inv, SLOT_STOP, MAT_STOP, gui, "editor.buttons.stop");
-        button(inv, SLOT_SETTINGS, MAT_SETTINGS, gui, "editor.buttons.settings");
-        button(inv, SLOT_RANGE_HELP, MAT_HELP, gui, "editor.buttons.range-help", session);
-        button(inv, SLOT_EDIT_HELP, MAT_HELP, gui, "editor.buttons.edit-help", session);
+        button(inv, SLOT_NEXT_TICK, MAT_NEXT, gui, "editor.buttons.next-tick");
         // [STOP] :: 렌더 끝
     }
 
-    // 눈금 행만 갱신 (재생 헤드/커서 이동, 스크롤 미변경 시)
+    // 눈금 행만 갱신 (재생 헤드 이동, 스크롤 미변경 시)
     public static void renderRuler(Inventory inv, EditorSession session, GuiConfig gui) {
         int tickOffset = session.tickOffset();
+        // 선택 틱 집합은 매번 새로 만들어지니 루프 밖에서 한 번만 뽑는다
+        NavigableSet<Integer> selected = session.selectedTicks();
+        boolean hasAnchor = session.hasRangeAnchor();
+        int anchorTick = hasAnchor ? session.rangeAnchorTick() : -1;
         for (int c = 0; c < EditorSession.VISIBLE_TICKS; c++) {
             int tick = tickOffset + c;
             inv.setItem(RULER_ROW * 9 + GRID_COL_START + c,
                     rulerItem(gui, tick, session.playingTick() == tick,
-                            session.hasRangeAnchor() && session.rangeAnchorTick() == tick,
-                            session.cursorTick() == tick));
+                            hasAnchor && anchorTick == tick, selected.contains(tick)));
         }
     }
 
@@ -210,18 +220,21 @@ public final class EditorRenderer {
         return item(MAT_INFO, gui.name("editor.info.name", ph), gui.lore("editor.info.lore", ph));
     }
 
-    private static ItemStack rulerItem(GuiConfig gui, int tick, boolean playing, boolean anchor, boolean cursor) {
+    // 우선순위 :: 재생 헤드 > 대기 중 시작점 > 선택됨 > 미선택
+    private static ItemStack rulerItem(GuiConfig gui, int tick, boolean playing, boolean anchor, boolean selected) {
         String tickStr = String.valueOf(tick);
-        // 재생 헤드 표시가 커서 표시보다 우선
         if (playing) {
-            return item(MAT_RULER_ON, gui.name("editor.ruler-playing.name", "tick", tickStr), null);
+            return item(MAT_TICK_PLAYING, gui.name("editor.ruler-playing.name", "tick", tickStr), null);
         }
+        // [1] :: 끝점을 아직 안 찍은 시작점인가? 주황 + 글린트로 대기 중임을 알린다
         if (anchor) {
-            return item(MAT_RULER_ANCHOR, gui.name("editor.ruler-anchor.name", "tick", tickStr),
+            ItemStack it = item(MAT_TICK_ANCHOR, gui.name("editor.ruler-anchor.name", "tick", tickStr),
                     gui.lore("editor.ruler-anchor.lore", "tick", tickStr));
+            setGlint(it);
+            return it;
         }
-        String base = cursor ? "editor.ruler-cursor" : "editor.ruler";
-        return item(cursor ? MAT_RULER_CURSOR : MAT_RULER,
+        String base = selected ? "editor.ruler-selected" : "editor.ruler";
+        return item(selected ? MAT_TICK_SELECTED : MAT_TICK,
                 gui.name(base + ".name", "tick", tickStr), gui.lore(base + ".lore", "tick", tickStr));
     }
 

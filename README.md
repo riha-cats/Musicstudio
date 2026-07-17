@@ -70,15 +70,16 @@ On a **layer header**, press F to select that complete logical layer for movemen
 | Target | Action |
 |--------|--------|
 | **Empty cell** | Left-click — create a note at the current pitch |
-| **Note** | Left: select · Right: +1 semitone · Shift+Right: −1 semitone · Shift+Left: delete |
+| **Note** | Left: select (copies its pitch) · Right: +1 semitone · Shift+Right: −1 semitone · Shift+Left: range select · Q: delete |
 | **Layer header** | Left: change instrument · Right: toggle mute · Shift+Left/Right: volume ±10% · Q (drop): delete layer |
 | **Info (jukebox)** | Left: pitch up · Right: pitch down · Shift: by octave — sets the pitch used for new notes |
-| **Ruler (paper)** | Click: put the existing editor cursor on that tick · click again: clear it |
+| **Tick banners** | White: unselected · Yellow: selected · Orange: range start pending · Lime: playhead (display only) |
 | **◀ / ▶ tick** | Scroll one tick · Shift: jump 8 ticks |
 | **▲ / ▼ layer** | Scroll layers up / down |
-| **▶ preview / ■ stop** | Preview the song to yourself / stop |
-| **Settings** | Tempo and disc extraction |
-| **Tick ranges** | On an editor cell: F sets range start/end; 1 copies selected ticks; 2 pastes at the hovered tick; 3 clears; Q cancels a pending start. Empty ticks, scrolling, and non-contiguous ranges are supported. |
+| **▶ preview** | Preview to yourself. Press again to stop (the button toggles) |
+| **Settings** | Tempo |
+| **Output** | Press this song onto a music disc |
+| **Copy / paste** | Shift+left click twice on editor cells to pick a range, then press Copy. Paste lands on the first selected tick (leftmost visible tick if nothing is selected). Right click Copy to clear the selection. Empty ticks, scrolling, and non-contiguous ranges are supported. |
 | **Music disc item** | Right-click: play · right-click again: stop |
 
 **Instruments (16):** Harp, Bass, Bass Drum, Snare, Hat, Guitar, Flute, Bell, Chime, Xylophone, Iron Xylophone, Cow Bell, Didgeridoo, Bit, Banjo, Pling.

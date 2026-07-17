@@ -75,4 +75,44 @@ class LocalizedConfigFallbackTest {
         with.options().copyDefaults(true);
         assertEquals(fresh, with.getString("editor.copy-success"));
     }
+
+    // migrate 로 지운 키를 정본(ko_kr)만 defaults 로 두고 채우면 en_us 가 한국어로 오염된다.
+    // 번들 로케일을 정본 위에 덮어야 그 로케일의 새 번역이 들어온다 (overlayBundledLocale)
+    @Test
+    void bundledLocaleOverridesCanonicalWhenMigrateClearsKey() throws InvalidConfigurationException {
+        // [0] :: 정본(ko_kr) 번들
+        YamlConfiguration canonical = new YamlConfiguration();
+        canonical.set("config-version", 4);
+        canonical.set("editor.ruler", "틱 <tick>");
+        canonical.set("editor.filler", "채움");
+
+        // [1] :: 같은 키를 번역해 둔 en_us 번들
+        YamlConfiguration localeBundle = new YamlConfiguration();
+        localeBundle.set("config-version", 4);
+        localeBundle.set("editor.ruler", "Tick <tick>");
+
+        // [2] :: 정본 위에 번들 로케일을 덮어 단일 defaults 를 만든다 (config-version 은 정본 유지)
+        for (String key : localeBundle.getKeys(true)) {
+            if (!localeBundle.isConfigurationSection(key) && !key.equals("config-version")) {
+                canonical.set(key, localeBundle.get(key));
+            }
+        }
+
+        // [3] :: 구버전 en_us 파일에서 migrate 가 editor.ruler 를 지운 상황
+        YamlConfiguration onDisk = new YamlConfiguration();
+        onDisk.set("config-version", 3);
+        onDisk.set("editor.ruler", "Tick <tick> (old wording)");
+        YamlConfiguration loaded = new YamlConfiguration();
+        loaded.loadFromString(onDisk.saveToString());
+        loaded.set("editor.ruler", null);
+        loaded.setDefaults(canonical);
+        loaded.options().copyDefaults(true);
+
+        // [4] :: 결과 도출 — 지운 키는 영어 번역으로, 번역 없는 키만 한국어로 떨어진다
+        YamlConfiguration reloaded = new YamlConfiguration();
+        reloaded.loadFromString(loaded.saveToString());
+        assertEquals("Tick <tick>", reloaded.getString("editor.ruler"));
+        assertEquals("채움", reloaded.getString("editor.filler"));
+        assertEquals(4, canonical.getInt("config-version"));
+    }
 }

@@ -64,10 +64,14 @@ public abstract class LocalizedConfig {
         if (canonical == null) {
             return loaded;
         }
+        // 정본 버전은 덮어쓰기 전에 읽어둔다 (로케일 파일 버전이 아니라 정본이 기준이다)
+        int bundledVer = canonical.getInt("config-version", 1);
+        // 같은 로케일의 번들 파일이 있다면 정본 위에 덮어써서 defaults 를 만든다.
+        // 정본만 defaults 로 두면 migrate 가 지운 en_us 키가 한국어로 채워진다
+        overlayBundledLocale(canonical, locale);
         loaded.setDefaults(canonical);
 
         // [3] :: 파일 버전이 낮다면? 누락 키를 파일에 실제로 복사해 관리자가 편집할 수 있게 한다
-        int bundledVer = canonical.getInt("config-version", 1);
         if (savedVer < bundledVer) {
             migrate(loaded, savedVer, bundledVer);
             loaded.options().copyDefaults(true);
@@ -83,12 +87,40 @@ public abstract class LocalizedConfig {
         // [STOP] :: 로케일 로드 끝
     }
 
+    // 번들 로케일 값을 정본 위에 덮어 단일 defaults 를 만든다. config-version 은 정본 것을 지킨다
+    private void overlayBundledLocale(YamlConfiguration canonical, String locale) {
+        if (locale.equals(CANONICAL)) {
+            return;
+        }
+        YamlConfiguration localeBundle = bundled(base + "_" + locale + ".yml");
+        if (localeBundle == null) {
+            return;
+        }
+        for (String key : localeBundle.getKeys(true)) {
+            if (!localeBundle.isConfigurationSection(key) && !key.equals("config-version")) {
+                canonical.set(key, localeBundle.get(key));
+            }
+        }
+        // [STOP] :: 덮어쓰기 끝
+    }
+
     private void migrate(YamlConfiguration loaded, int fromVersion, int toVersion) {
         if (base.equals("gui") && fromVersion < 3 && toVersion >= 3) {
             for (String path : List.of(
                     "editor.header.name", "editor.header.name-muted",
                     "editor.header.name-moving", "editor.header.lore",
                     "editor.header.lore-moving")) {
+                loaded.set(path, null);
+            }
+        }
+        // v4 :: 숨은 키(F/1/2/3/Q) 조작을 버튼과 Shift+좌클릭으로 갈아엎었다.
+        // 아래 키들은 문구의 뜻 자체가 바뀌었거나(눈금·셀 안내) 사라져서(도움말 책) 지워야 한다
+        if (base.equals("gui") && fromVersion < 4 && toVersion >= 4) {
+            for (String path : List.of(
+                    "editor.ruler", "editor.ruler-cursor", "editor.ruler-anchor",
+                    "editor.buttons.range-help", "editor.buttons.edit-help",
+                    "editor.buttons.play", "editor.buttons.stop", "editor.buttons.settings",
+                    "editor.empty-cell", "editor.note")) {
                 loaded.set(path, null);
             }
         }
@@ -102,6 +134,16 @@ public abstract class LocalizedConfig {
                 loaded.set(path, null);
             }
         }
+        // v6 :: F 키 안내가 Shift+좌클릭으로 바뀌었다. 죽은 키 5개는 목록에서 지워 파일에서도 걷어낸다
+        if (base.equals("messages") && fromVersion < 6 && toVersion >= 6) {
+            for (String path : List.of(
+                    "editor.copy-no-selection", "editor.range-start", "editor.range-cancelled",
+                    "editor.copy-empty", "editor.copy-range-success", "editor.copy-range-empty",
+                    "editor.paste-success", "editor.paste-partial")) {
+                loaded.set(path, null);
+            }
+        }
+        // [STOP] :: 마이그레이션 끝
     }
 
     private YamlConfiguration bundled(String fileName) {

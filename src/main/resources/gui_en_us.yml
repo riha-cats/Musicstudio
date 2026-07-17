@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from gui_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 3
+config-version: 4
 
 editor:
   header:
@@ -16,23 +16,37 @@ editor:
   title: "<light_purple>♪ <song>"
   empty-cell:
     name: "<dark_gray>·"
-    lore: ["<dark_gray>Tick <tick> / Layer <layer>", "<gray>Left click: create <key_name>", "<aqua>F: range start/end", "<aqua>1 copy · 2 paste · 3 clear · Q cancel start"]
+    lore: ["<dark_gray>Tick <tick> / Layer <layer>", "<gray>Left click: create <key_name>", "<aqua>Shift+left click: range start/end"]
+  note:
+    lore: ["<aqua>Note: <key_name> (key <key>)", "<gray>Tick <tick> / Layer <layer>", "", "<yellow>Left click: select (copies this pitch)", "<yellow>Right click: +1 / Shift+right: -1", "<aqua>Shift+left click: range start/end", "<red>Q (drop): delete"]
   info:
     name: "<light_purple>♪ <song>"
     lore: ["<gray>Tempo: <tempo> ticks/cell", "<gray>Length: <length> cells / <notes> notes", "<gray>Layers: <layers> / <max_layers>", "<aqua>New note: <key_name>", "<aqua>Selected ticks: <selected_ticks> · Range start: <anchor_tick>"]
   ruler:
-    name: "<gray>Tick <tick>"
-    lore: ["<gray>Click: mark this ruler position", "<gray>This is not used for copy or paste"]
-  ruler-cursor:
-    name: "<yellow>▼ Tick <tick> (ruler marker)"
-    lore: ["<gray>Currently marked ruler position", "<gray>Paste uses the hovered editor cell", "<gray>Click again to clear"]
+    name: "<white>Tick <tick>"
+    lore: ["<gray>Not selected", "<dark_gray>Shift+left click an editor cell to select"]
+  ruler-selected:
+    name: "<yellow>■ Tick <tick> (selected)"
+    lore: ["<gray>Copy will take this tick", "<dark_gray>Right click Copy to clear all"]
   ruler-anchor:
-    name: "<gold>◆ Tick <tick> (range start)"
-    lore: ["<gray>Press F on another editor cell to finish", "<gray>Press Q on an editor cell to cancel only the start"]
+    name: "<gold>◆ Tick <tick> (range start — waiting for end)"
+    lore: ["<gray>Shift+left click another editor cell to select everything between", "<dark_gray>Right click Copy to cancel"]
   buttons:
-    range-help:
-      name: "<white>Tick range controls"
-      lore: ["<yellow>F: range start / end", "<yellow>1: copy selected ticks", "<yellow>2: paste at hovered tick", "<yellow>3: clear selection", "<yellow>Q: cancel pending start", "<gray><selected_ticks> ticks selected · start <anchor_tick>"]
-    edit-help:
-      name: "<white>Range selection help"
-      lore: ["<gray>Ranges can span scrolling.", "<gray>Empty ticks and multiple non-contiguous ranges work.", "<gray>Press F twice on one tick to select that tick."]
+    copy:
+      name: "<white>Copy"
+      lore: ["<gray>Copies the selected cells", "<gray>Right click: clear the whole selection", "<dark_gray>Shift+left click twice on cells to pick a range", "<gray><selected_ticks> ticks selected · pending start <anchor_tick>"]
+    paste:
+      name: "<white>Paste"
+      lore: ["<gray>Pastes at the first selected tick", "<gray>With no selection, the leftmost visible tick", "<dark_gray>Select a single cell to paste exactly there", "<gray><selected_ticks> ticks selected · pending start <anchor_tick>"]
+    output:
+      name: "<light_purple>Extract disc"
+      lore: ["<gray>Press this song onto a music disc"]
+    play:
+      name: "<green>▶ Preview"
+      lore: ["<gray>Only you hear it", "<gray>Press again to stop"]
+    stop:
+      name: "<red>■ Stop"
+      lore: ["<gray>Stops the preview"]
+    settings:
+      name: "<gold>Settings"
+      lore: ["<gray>Tempo"]

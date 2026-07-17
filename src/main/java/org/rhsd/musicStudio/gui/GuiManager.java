@@ -114,22 +114,12 @@ public final class GuiManager {
     // 에디터 클릭 라우팅
     // =================================================================
 
-    public void handleEditorClick(Player player, int slot, ClickType click, int hotbarButton) {
+    public void handleEditorClick(Player player, int slot, ClickType click) {
         EditorSession session = sessions.get(player.getUniqueId());
         if (session == null) return;
         Song song = session.song();
         int row = slot / 9;
         int col = slot % 9;
-
-        // F and number keys are reserved for real cells of existing layer rows only.
-        if (click == ClickType.NUMBER_KEY) {
-            int hoveredLayer = session.layerOffset() + row;
-            boolean editorCell = row >= 0 && row < EditorSession.VISIBLE_LAYERS
-                    && col >= EditorRenderer.GRID_COL_START
-                    && col < EditorRenderer.GRID_COL_START + EditorSession.VISIBLE_TICKS
-                    && hoveredLayer < session.song().layerCount();
-            if (!editorCell) return;
-        }
 
         // [A] :: 컨트롤 바(행5)를 클릭했는가?
         if (row == EditorRenderer.CONTROL_ROW) {
@@ -150,11 +140,7 @@ public final class GuiManager {
                     rerender(player, session);
                 }
             }
-            // [2] :: 눈금 칸이라면, 복사/붙여넣기 커서 지정 (재클릭 시 해제)
-            else if (col >= EditorRenderer.GRID_COL_START) {
-                session.toggleCursor(session.tickOffset() + col - EditorRenderer.GRID_COL_START);
-                rerenderRuler(player, session);
-            }
+            // [2] :: 틱 배너는 선택 상태를 읽어주기만 한다. 선택은 셀에서 Shift+좌클릭으로 한다
             return;
         }
 
@@ -172,26 +158,9 @@ public final class GuiManager {
                 || col >= EditorRenderer.GRID_COL_START + EditorSession.VISIBLE_TICKS
                 || layerIdx >= song.layerCount()) return;
         int tick = session.tickOffset() + (col - EditorRenderer.GRID_COL_START);
-        // Keyboard actions precede note lookup so empty cells work as targets.
-        if (click == ClickType.SWAP_OFFHAND) {
+        // 범위 선택은 노트 조회보다 먼저 처리한다. 빈 칸도 선택 대상이라야 빈 틱 구조가 복사된다
+        if (click == ClickType.SHIFT_LEFT) {
             handleRangeToggle(player, session, tick, layerIdx);
-            return;
-        }
-        if (click == ClickType.NUMBER_KEY) {
-            switch (hotbarButton) {
-                case 0 -> doCopy(player, session);
-                case 1 -> doPaste(player, session, tick);
-                case 2 -> clearTickRange(player, session);
-                default -> { }
-            }
-            return;
-        }
-        if (click == ClickType.DROP) {
-            if (session.hasRangeAnchor()) {
-                session.clearRangeAnchor();
-                msg.send(player, "editor.range-cancelled");
-                rerender(player, session);
-            }
             return;
         }
         Note note = song.getNote(tick, layerIdx);
@@ -233,8 +202,8 @@ public final class GuiManager {
                 previewNote(player, layer, note);
                 rerender(player, session);
             }
-            // Shift+좌클릭 :: 노트 삭제
-            case SHIFT_LEFT -> {
+            // Q(드롭) :: 노트 삭제. 레이어 헤더의 Q 와 같은 "Q = 삭제" 규칙이다
+            case DROP -> {
                 song.removeNote(tick, layerIdx);
                 if (session.isSelected(tick, layerIdx)) session.clearSelection();
                 rerender(player, session);
@@ -318,6 +287,37 @@ public final class GuiManager {
         }
     }
 
+    // 붙여넣기 기준 틱 :: 선택 구간의 첫 틱. 선택이 없다면? 화면 맨 왼쪽 틱으로 떨어진다
+    // (한 칸만 Shift+좌클릭하면 그게 곧 붙여넣을 자리가 된다 — 커서 개념을 따로 두지 않는 이유)
+    private int pasteBaseTick(EditorSession session) {
+        NavigableSet<Integer> selected = session.selectedTicks();
+        return selected.isEmpty() ? session.tickOffset() : selected.first();
+    }
+
+    // 음반 추출. 컨트롤 바의 Output 버튼과 설정 메뉴가 함께 쓴다
+    private void extractDisc(Player player, Song song) {
+        // [1] :: 빈 곡인가?
+        if (song.maxTick() < 0) {
+            msg.send(player, "editor.disc-empty");
+        }
+        // [2] :: 본인 소유 곡이 아닌가? (관리자는 통과)
+        else if (song.owner() != null
+                && !song.owner().equals(player.getUniqueId())
+                && !player.hasPermission(MsCommand.PERM_ADMIN)) {
+            msg.send(player, "command.disc-not-owner");
+        }
+        // [3] :: 추출 비용이 부족한가?
+        else if (!discManager.takeCost(player)) {
+            msg.send(player, "command.disc-cost-insufficient", discManager.costPlaceholders());
+        }
+        // [4] PASSED :: 음반 지급
+        else {
+            discManager.giveDisc(player, song);
+            msg.send(player, "editor.disc-extracted", "name", song.name());
+        }
+        // [STOP] :: 추출 끝
+    }
+
     private void handleControl(Player player, EditorSession session, int slot, ClickType click) {
         boolean shift = click.isShiftClick();
         switch (slot) {
@@ -339,16 +339,25 @@ public final class GuiManager {
                 session.scrollLayer(1);
                 rerender(player, session);
             }
-            // 미리듣기 / 정지
-            case EditorRenderer.SLOT_PLAY  -> startPreview(player, session);
-            case EditorRenderer.SLOT_STOP  -> {
-                boolean wasPlaying = previews.containsKey(player.getUniqueId());
-                stopPreview(player);
-                if (wasPlaying) msg.send(player, "editor.play-stop");
-                rerender(player, session);
+            // 미리듣기 토글 :: 재생 중이면 정지, 아니면 재생. 버튼 아이콘이 곧 현재 상태다
+            case EditorRenderer.SLOT_PLAY -> {
+                if (previews.containsKey(player.getUniqueId())) {
+                    stopPreview(player);
+                    msg.send(player, "editor.play-stop");
+                    rerender(player, session);
+                } else {
+                    startPreview(player, session);
+                }
             }
-            // 설정 / 복사 / 붙여넣기
+            // 복사 :: 우클릭이면 선택 전체 해제 (대기 중인 시작점도 같이 취소된다)
+            case EditorRenderer.SLOT_COPY -> {
+                if (click.isRightClick()) clearTickRange(player, session);
+                else doCopy(player, session);
+            }
+            case EditorRenderer.SLOT_PASTE -> doPaste(player, session, pasteBaseTick(session));
+            // 설정 / 음반 추출
             case EditorRenderer.SLOT_SETTINGS -> player.openInventory(SettingsMenu.build(session.song(), gui));
+            case EditorRenderer.SLOT_OUTPUT   -> extractDisc(player, session.song());
             default -> {
             }
         }
@@ -472,27 +481,7 @@ public final class GuiManager {
                 SettingsMenu.render(menu.getInventory(), song, gui);
             }
             // 음반 추출
-            case SettingsMenu.SLOT_DISC -> {
-                // [1] :: 빈 곡인가?
-                if (song.maxTick() < 0) {
-                    msg.send(player, "editor.disc-empty");
-                }
-                // [2] :: 본인 소유 곡이 아닌가? (관리자는 통과)
-                else if (song.owner() != null
-                        && !song.owner().equals(player.getUniqueId())
-                        && !player.hasPermission(MsCommand.PERM_ADMIN)) {
-                    msg.send(player, "command.disc-not-owner");
-                }
-                // [3] :: 추출 비용이 부족한가?
-                else if (!discManager.takeCost(player)) {
-                    msg.send(player, "command.disc-cost-insufficient", discManager.costPlaceholders());
-                }
-                // [4] PASSED :: 음반 지급
-                else {
-                    discManager.giveDisc(player, song);
-                    msg.send(player, "editor.disc-extracted", "name", song.name());
-                }
-            }
+            case SettingsMenu.SLOT_DISC -> extractDisc(player, song);
             // 에디터로 복귀
             case SettingsMenu.SLOT_BACK -> reopenEditor(player, session);
             default -> {

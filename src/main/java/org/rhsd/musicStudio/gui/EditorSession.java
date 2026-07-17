@@ -35,7 +35,6 @@ public final class EditorSession {
     private int currentKey = 12;
     private Integer selectedTick;
     private Integer selectedLayer;
-    private int cursorTick = -1;
     private int playingTick = -1;
     private Integer movingLayerIndex;
 
@@ -77,7 +76,6 @@ public final class EditorSession {
     public void select(int tick, int layer) {
         selectedTick = tick;
         selectedLayer = layer;
-        cursorTick = tick;
     }
     public void clearSelection() { selectedTick = null; selectedLayer = null; }
 
@@ -163,8 +161,6 @@ public final class EditorSession {
 
     public void onLayerDeleted(int deletedLayer) { remapAfterLayerDeletion(deletedLayer); }
 
-    public int cursorTick() { return cursorTick; }
-    public void toggleCursor(int tick) { cursorTick = cursorTick == tick ? -1 : tick; }
     public int playingTick() { return playingTick; }
     public void setPlayingTick(int playingTick) { this.playingTick = playingTick; }
 
