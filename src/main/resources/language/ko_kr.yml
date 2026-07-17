@@ -279,6 +279,33 @@ gui:
     entry-current:
       name: "<gold><instrument>"
       lore: [ "<gold>현재 악기" ]
+    # 악기 이름. 키는 Instrument enum 이름을 소문자로 적은 것이다
+    # <instrument> 자리에 글자 그대로 들어가므로 여기엔 색 태그를 쓸 수 없다
+    names:
+      # 노트블록 악기 16종
+      harp: "하프"
+      bass: "베이스"
+      basedrum: "베이스드럼"
+      snare: "스네어"
+      hat: "하이햇"
+      guitar: "기타"
+      flute: "플루트"
+      bell: "벨"
+      chime: "차임"
+      xylophone: "실로폰"
+      iron_xylophone: "철실로폰"
+      cow_bell: "카우벨"
+      didgeridoo: "디저리두"
+      bit: "비트"
+      banjo: "밴조"
+      pling: "플링"
+      # 노트블록에 머리를 얹었을 때 나는 소리
+      creeper: "크리퍼"
+      ender_dragon: "엔더 드래곤"
+      piglin: "피글린"
+      skeleton: "스켈레톤"
+      wither_skeleton: "위더 스켈레톤"
+      zombie: "좀비"
 
   # =================================================================
   # 설정 메뉴

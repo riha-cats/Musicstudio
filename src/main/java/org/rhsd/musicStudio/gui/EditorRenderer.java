@@ -164,7 +164,7 @@ public final class EditorRenderer {
         String[] ph = {
                 "n", String.valueOf(layerIdx + 1),
                 "layer_name", layer.name(),
-                "instrument", layer.instrument().displayName(),
+                "instrument", gui.instrumentName(layer.instrument()),
                 "volume", String.valueOf(Math.round(layer.volume() * 100)),
                 "muted", layer.muted() ? " (음소거)" : "",
                 "total", String.valueOf(total)

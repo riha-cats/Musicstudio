@@ -136,3 +136,37 @@ gui:
     next-page:
       name: "<aqua>Next page ▶"
       lore: ["<gray>Page <page> / <pages>"]
+
+  instrument:
+    title: "<dark_aqua>Pick an instrument — layer <n>"
+    entry:
+      name: "<white><instrument>"
+      lore: ["<gray>Click to select"]
+    entry-current:
+      name: "<gold><instrument>"
+      lore: ["<gold>Current instrument"]
+    # Keys are the Instrument enum names in lower case.
+    # These land in <instrument> literally, so no colour tags here.
+    names:
+      harp: "Harp"
+      bass: "Bass"
+      basedrum: "Bass Drum"
+      snare: "Snare"
+      hat: "Hat"
+      guitar: "Guitar"
+      flute: "Flute"
+      bell: "Bell"
+      chime: "Chime"
+      xylophone: "Xylophone"
+      iron_xylophone: "Iron Xylophone"
+      cow_bell: "Cow Bell"
+      didgeridoo: "Didgeridoo"
+      bit: "Bit"
+      banjo: "Banjo"
+      pling: "Pling"
+      creeper: "Creeper"
+      ender_dragon: "Ender Dragon"
+      piglin: "Piglin"
+      skeleton: "Skeleton"
+      wither_skeleton: "Wither Skeleton"
+      zombie: "Zombie"

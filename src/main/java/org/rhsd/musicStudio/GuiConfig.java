@@ -3,6 +3,7 @@ package org.rhsd.musicStudio;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.rhsd.musicStudio.model.Instrument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,13 @@ public final class GuiConfig {
                     .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
         return out;
+    }
+
+    // 악기 이름. <instrument> 플레이스홀더로 꽂히는 자리라 Component 가 아니라 평문이다
+    // (unparsed 로 들어가므로 여기에 MiniMessage 를 적어도 색이 아니라 글자로 보인다)
+    // 키가 없으면 enum 이름을 그대로 내보내 [Missing] 대신 최소한 뭐가 빠졌는지는 읽히게 한다
+    public String instrumentName(Instrument instrument) {
+        return store.string(PREFIX + "instrument.names." + instrument.key(), instrument.name());
     }
 }
 

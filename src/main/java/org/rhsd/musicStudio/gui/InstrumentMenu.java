@@ -13,8 +13,11 @@ import org.rhsd.musicStudio.model.Song;
 // =================================================================
 // 악기 선택 메뉴 (27칸)
 // =================================================================
-// 16악기를 보여주고 선택 시 해당 레이어 악기를 바꾼다. 텍스트는 GuiConfig 에서
+// 악기를 전부 늘어놓고 선택 시 해당 레이어 악기를 바꾼다. 텍스트는 GuiConfig 에서
+// 앞칸부터 순서대로 채우므로 Instrument 가 27개를 넘으면 안 된다 (InstrumentMenuLayoutTest 가 지킨다)
 public final class InstrumentMenu implements MsHolder {
+
+    public static final int SIZE = 27;
 
     private final String songId;
     private final int layerIndex;
@@ -40,7 +43,7 @@ public final class InstrumentMenu implements MsHolder {
 
     public static Inventory build(Song song, int layerIndex, GuiConfig gui) {
         InstrumentMenu holder = new InstrumentMenu(song.id(), layerIndex);
-        Inventory inv = Bukkit.createInventory(holder, 27,
+        Inventory inv = Bukkit.createInventory(holder, SIZE,
                 gui.title("instrument.title", "n", String.valueOf(layerIndex + 1)));
         holder.inventory = inv;
 
@@ -54,11 +57,12 @@ public final class InstrumentMenu implements MsHolder {
 
     private static ItemStack instrumentItem(GuiConfig gui, Instrument instrument, boolean current) {
         String base = current ? "instrument.entry-current" : "instrument.entry";
+        String label = gui.instrumentName(instrument);
         ItemStack it = new ItemStack(instrument.icon());
         ItemMeta meta = it.getItemMeta();
         if (meta != null) {
-            meta.displayName(gui.name(base + ".name", "instrument", instrument.displayName()));
-            meta.lore(gui.lore(base + ".lore", "instrument", instrument.displayName()));
+            meta.displayName(gui.name(base + ".name", "instrument", label));
+            meta.lore(gui.lore(base + ".lore", "instrument", label));
             // 현재 사용 중인 악기라면? 글린트로 강조
             if (current) {
                 ItemCompat.setGlint(meta, true);
