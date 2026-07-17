@@ -158,6 +158,41 @@ public final class Song {
         // [STOP] :: 레이어 삭제 끝
     }
 
+    public static int remapLayerIndex(int layer, int from, int to) {
+        if (layer == from) return to;
+        if (from < to && layer > from && layer <= to) return layer - 1;
+        if (from > to && layer >= to && layer < from) return layer + 1;
+        return layer;
+    }
+
+    /** Moves one complete logical layer to the exact requested index. */
+    public boolean moveLayer(int from, int to) {
+        if (from < 0 || to < 0 || from >= layers.size() || to >= layers.size() || from == to) {
+            return false;
+        }
+
+        Layer movedLayer = layers.get(from);
+        List<Layer> reordered = new ArrayList<>(layers);
+        reordered.remove(from);
+        reordered.add(to, movedLayer);
+
+        Map<Long, Note> rebuilt = new HashMap<>(notes.size());
+        for (Note note : notes.values()) {
+            int newLayer = remapLayerIndex(note.layer(), from, to);
+            Note moved = new Note(note.tick(), newLayer, note.key());
+            Note collision = rebuilt.put(index(moved.tick(), moved.layer()), moved);
+            if (collision != null) {
+                throw new IllegalStateException("Layer move produced a note collision");
+            }
+        }
+
+        layers.clear();
+        layers.addAll(reordered);
+        notes.clear();
+        notes.putAll(rebuilt);
+        return true;
+    }
+
     // 노트
     public Note getNote(int tick, int layer) {
         return notes.get(index(tick, layer));

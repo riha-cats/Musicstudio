@@ -122,7 +122,7 @@ public final class GuiManager {
         int col = slot % 9;
 
         // F and number keys are reserved for real cells of existing layer rows only.
-        if (click == ClickType.SWAP_OFFHAND || click == ClickType.NUMBER_KEY) {
+        if (click == ClickType.NUMBER_KEY) {
             int hoveredLayer = session.layerOffset() + row;
             boolean editorCell = row >= 0 && row < EditorSession.VISIBLE_LAYERS
                     && col >= EditorRenderer.GRID_COL_START
@@ -250,6 +250,31 @@ public final class GuiManager {
         // [A] :: 존재하는 레이어의 헤더인가?
         if (layerIdx < song.layerCount()) {
             Layer layer = song.layer(layerIdx);
+            if (click == ClickType.SWAP_OFFHAND) {
+                if (!session.hasMovingLayer()) {
+                    session.beginLayerMove(layerIdx);
+                    msg.send(player, "editor.layer-move-selected", "layer", String.valueOf(layerIdx + 1),
+                            "layer_name", layer.name());
+                } else {
+                    int from = session.movingLayerIndex();
+                    if (from == layerIdx) {
+                        session.clearLayerMove();
+                        msg.send(player, "editor.layer-move-cancelled", "layer", String.valueOf(layerIdx + 1),
+                                "layer_name", layer.name());
+                    } else if (song.moveLayer(from, layerIdx)) {
+                        session.remapAfterLayerMove(from, layerIdx);
+                        session.clearLayerMove();
+                        session.scrollLayer(0);
+                        msg.send(player, "editor.layer-moved", "from", String.valueOf(from + 1),
+                                "to", String.valueOf(layerIdx + 1), "layer_name", song.layer(layerIdx).name());
+                    } else {
+                        session.clearLayerMove();
+                        msg.send(player, "editor.layer-move-invalid");
+                    }
+                }
+                rerender(player, session);
+                return;
+            }
             switch (click) {
                 // 좌클릭 :: 악기 변경 메뉴 열기
                 case LEFT -> player.openInventory(InstrumentMenu.build(song, layerIdx, gui));
@@ -383,14 +408,11 @@ public final class GuiManager {
         int tickCount = session.selectedTicks().size();
 
         msg.send(player, "editor.copy-success",
-                "tick", String.valueOf(first),
-                "count", String.valueOf(noteCount),
-
                 "ticks", String.valueOf(tickCount),
                 "notes", String.valueOf(noteCount),
                 "from", String.valueOf(first),
                 "to", String.valueOf(last));
-            }
+    }
 
     private void doPaste(Player player, EditorSession session, int base) {
         if (!session.hasClipboard()) {

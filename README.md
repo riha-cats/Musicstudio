@@ -65,6 +65,8 @@ Base command: `/음악스튜디오` &nbsp;(aliases: `/음스`, `/ms`, `/musicstu
 
 The editor is an inventory GUI. Rows are **layers**, columns are **ticks**; the bottom rows hold the ruler and control bar.
 
+On a **layer header**, press F to select that complete logical layer for movement, then press F on another header to move it to that exact position. Press F on the selected source again to cancel. Q continues to delete a layer.
+
 | Target | Action |
 |--------|--------|
 | **Empty cell** | Left-click — create a note at the current pitch |

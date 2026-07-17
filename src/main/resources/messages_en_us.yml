@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from messages_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 0
+config-version: 5
 
 prefix: "<light_purple>[MusicStudio]</light_purple> "
 
@@ -11,6 +11,10 @@ no-permission: "<red>You don't have permission."
 player-only: "<red>Players only."
 
 editor:
+  layer-move-selected: "<yellow>Selected the layer currently at position <white><layer></white>. Press F on a destination layer header."
+  layer-move-cancelled: "<gray>Cancelled moving the layer at position <white><layer></white>."
+  layer-moved: "<green>Moved the layer from position <white><from></white> to <white><to></white>."
+  layer-move-invalid: "<red>That layer move is no longer valid."
   range-start: "<yellow>Tick <white><anchor_tick></white> is now the range start; it persists while scrolling."
   range-cancelled: "<gray>Cancelled the pending range start; completed selection was preserved."
   range-added: "<green>Added ticks <white><from>~<to></white> (<affected> ticks). <white><total></white> ticks selected."

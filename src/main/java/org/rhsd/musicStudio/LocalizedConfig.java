@@ -69,6 +69,7 @@ public abstract class LocalizedConfig {
         // [3] :: 파일 버전이 낮다면? 누락 키를 파일에 실제로 복사해 관리자가 편집할 수 있게 한다
         int bundledVer = canonical.getInt("config-version", 1);
         if (savedVer < bundledVer) {
+            migrate(loaded, savedVer, bundledVer);
             loaded.options().copyDefaults(true);
             loaded.set("config-version", bundledVer);
             try {
@@ -80,6 +81,27 @@ public abstract class LocalizedConfig {
         }
         return loaded;
         // [STOP] :: 로케일 로드 끝
+    }
+
+    private void migrate(YamlConfiguration loaded, int fromVersion, int toVersion) {
+        if (base.equals("gui") && fromVersion < 3 && toVersion >= 3) {
+            for (String path : List.of(
+                    "editor.header.name", "editor.header.name-muted",
+                    "editor.header.name-moving", "editor.header.lore",
+                    "editor.header.lore-moving")) {
+                loaded.set(path, null);
+            }
+        }
+        if (base.equals("messages") && fromVersion < 5 && toVersion >= 5) {
+            // copy-success 는 단일 틱에서 범위 복사로 뜻이 바뀌어 플레이스홀더가 통째로 교체됐다.
+            // copyDefaults 는 없는 키만 채우므로, 뜻이 바뀐 키는 여기서 지워야 새 문장이 들어온다
+            for (String path : List.of(
+                    "editor.layer-move-selected", "editor.layer-move-cancelled",
+                    "editor.layer-moved", "editor.layer-move-invalid",
+                    "editor.copy-success")) {
+                loaded.set(path, null);
+            }
+        }
     }
 
     private YamlConfiguration bundled(String fileName) {

@@ -3,9 +3,15 @@
 # While config-version is 0, missing keys get copied in from gui_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 0
+config-version: 3
 
 editor:
+  header:
+    name: "<white>Layer <n>"
+    name-muted: "<dark_gray>Layer <n>"
+    name-moving: "<gold>Moving layer <n>"
+    lore: ["<white>Current position: <n> / <total>", "<gray>Instrument: <instrument>", "<gray>Volume: <volume>%<muted>", "", "<yellow>Left: change instrument", "<yellow>Right: toggle mute", "<yellow>Shift+Left/Right: volume ±10%", "<aqua>F: select this layer to move / move the selected layer here", "<red>Q (drop): delete layer"]
+    lore-moving: ["<gold>Moving layer <n>", "<white>Current position: <n> / <total>", "<gray>Press F on another layer header to move here", "<gray>Press F again on this header to cancel"]
   # <song>
   title: "<light_purple>♪ <song>"
   empty-cell:
