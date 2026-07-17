@@ -44,6 +44,8 @@ editor:
     lore:
       - "<dark_gray>틱 <tick> / 레이어 <layer>"
       - "<gray>좌클릭: <key_name> 노트 생성"
+      - "<aqua>F: 틱 범위 시작/끝"
+      - "<aqua>1 복사 · 2 붙여넣기 · 3 선택 해제 · Q 시작 취소"
 
   add-layer:
     name: "<green>+ 레이어 추가"
@@ -59,21 +61,26 @@ editor:
       - "<gray>레이어: <layers> / <max_layers>"
       - ""
       - "<aqua>새 노트 음높이: <key_name>"
+      - "<aqua>선택 틱: <selected_ticks> · 범위 시작: <anchor_tick>"
       - "<yellow>좌클릭: 음↑ 우클릭: 음↓ (Shift: 옥타브)"
 
   # <tick>
   ruler:
     name: "<gray>틱 <tick>"
     lore:
-      - "<gray>클릭: 이 틱에 커서 놓기"
-      - "<gray>커서는 복사/붙여넣기의 기준 위치"
+      - "<gray>클릭: 이 틱에 눈금 위치 표시"
+      - "<gray>복사와 붙여넣기에는 사용되지 않습니다"
   ruler-cursor:
-    name: "<yellow>▼ 틱 <tick> (커서)"
+    name: "<yellow>▼ 틱 <tick> (눈금 표시)"
     lore:
-      - "<gray>복사/붙여넣기 기준 위치"
+      - "<gray>현재 표시한 눈금 위치"
+      - "<gray>붙여넣기는 마우스를 올린 편집 셀이 기준입니다"
       - "<gray>다시 클릭하면 해제"
   ruler-playing:
     name: "<green>▶ 틱 <tick>"
+  ruler-anchor:
+    name: "<gold>◆ 틱 <tick> (범위 시작)"
+    lore: ["<gray>다른 편집 셀에서 F를 눌러 범위를 완성", "<gray>편집 셀에서 Q를 누르면 시작만 취소"]
 
   filler:
     name: "<dark_gray> "
@@ -100,16 +107,21 @@ editor:
     settings:
       name: "<gold>설정"
       lore: [ "<gray>템포 · 음반 추출" ]
-    copy:
-      name: "<white>복사"
+    range-help:
+      name: "<white>틱 범위 편집 도움말"
       lore:
-        - "<gray>커서 틱의 노트를 복사"
-        - "<gray>Shift: 화면에 보이는 8틱 전체 복사"
-    paste:
-      name: "<white>붙여넣기"
+        - "<yellow>F: 범위 시작 / 끝"
+        - "<yellow>1: 선택한 틱 복사"
+        - "<yellow>2: 마우스를 올린 틱부터 붙여넣기"
+        - "<yellow>3: 선택 전체 해제"
+        - "<yellow>Q: 대기 중인 범위 시작 취소"
+        - "<gray>선택 틱 <selected_ticks>개 · 시작 <anchor_tick>"
+    edit-help:
+      name: "<white>범위 선택 안내"
       lore:
-        - "<gray>커서 틱부터 붙여넣기"
-        - "<gray>커서가 없으면 화면 맨 왼쪽 틱 기준"
+        - "<gray>스크롤을 넘어 범위를 선택할 수 있습니다."
+        - "<gray>빈 틱과 여러 비연속 구간도 선택됩니다."
+        - "<gray>F를 같은 틱에 두 번 누르면 한 틱만 선택합니다."
 
 # =================================================================
 # 악기 선택 메뉴

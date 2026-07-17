@@ -21,6 +21,8 @@ import org.rhsd.musicStudio.storage.SongStorage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -112,12 +114,22 @@ public final class GuiManager {
     // 에디터 클릭 라우팅
     // =================================================================
 
-    public void handleEditorClick(Player player, int slot, ClickType click) {
+    public void handleEditorClick(Player player, int slot, ClickType click, int hotbarButton) {
         EditorSession session = sessions.get(player.getUniqueId());
         if (session == null) return;
         Song song = session.song();
         int row = slot / 9;
         int col = slot % 9;
+
+        // F and number keys are reserved for real cells of existing layer rows only.
+        if (click == ClickType.SWAP_OFFHAND || click == ClickType.NUMBER_KEY) {
+            int hoveredLayer = session.layerOffset() + row;
+            boolean editorCell = row >= 0 && row < EditorSession.VISIBLE_LAYERS
+                    && col >= EditorRenderer.GRID_COL_START
+                    && col < EditorRenderer.GRID_COL_START + EditorSession.VISIBLE_TICKS
+                    && hoveredLayer < session.song().layerCount();
+            if (!editorCell) return;
+        }
 
         // [A] :: 컨트롤 바(행5)를 클릭했는가?
         if (row == EditorRenderer.CONTROL_ROW) {
@@ -155,8 +167,33 @@ public final class GuiManager {
         }
 
         // [D] :: 그리드 셀 클릭
-        if (layerIdx >= song.layerCount()) return;
+        if (row < 0 || row >= EditorSession.VISIBLE_LAYERS
+                || col < EditorRenderer.GRID_COL_START
+                || col >= EditorRenderer.GRID_COL_START + EditorSession.VISIBLE_TICKS
+                || layerIdx >= song.layerCount()) return;
         int tick = session.tickOffset() + (col - EditorRenderer.GRID_COL_START);
+        // Keyboard actions precede note lookup so empty cells work as targets.
+        if (click == ClickType.SWAP_OFFHAND) {
+            handleRangeToggle(player, session, tick, layerIdx);
+            return;
+        }
+        if (click == ClickType.NUMBER_KEY) {
+            switch (hotbarButton) {
+                case 0 -> doCopy(player, session);
+                case 1 -> doPaste(player, session, tick);
+                case 2 -> clearTickRange(player, session);
+                default -> { }
+            }
+            return;
+        }
+        if (click == ClickType.DROP) {
+            if (session.hasRangeAnchor()) {
+                session.clearRangeAnchor();
+                msg.send(player, "editor.range-cancelled");
+                rerender(player, session);
+            }
+            return;
+        }
         Note note = song.getNote(tick, layerIdx);
         Layer layer = song.layer(layerIdx);
 
@@ -237,7 +274,7 @@ public final class GuiManager {
                         return;
                     }
                     song.removeLayer(layerIdx);
-                    session.clearSelection();
+                    session.onLayerDeleted(layerIdx);
                     // 레이어 오프셋이 범위를 벗어났다면 조정
                     session.scrollLayer(0);
                     msg.send(player, "editor.layer-deleted",
@@ -287,8 +324,6 @@ public final class GuiManager {
             }
             // 설정 / 복사 / 붙여넣기
             case EditorRenderer.SLOT_SETTINGS -> player.openInventory(SettingsMenu.build(session.song(), gui));
-            case EditorRenderer.SLOT_COPY     -> doCopy(player, session, shift);
-            case EditorRenderer.SLOT_PASTE    -> doPaste(player, session);
             default -> {
             }
         }
@@ -298,83 +333,86 @@ public final class GuiManager {
     // 복사 / 붙여넣기
     // =================================================================
 
-    private void doCopy(Player player, EditorSession session, boolean page) {
-        Song song = session.song();
-        List<int[]> data = new ArrayList<>();
-
-        // [A] :: Shift 복사인가? 화면에 보이는 8틱 전체 복사
-        if (page) {
-            int from = session.tickOffset();
-            int to = from + EditorSession.VISIBLE_TICKS - 1;
-            for (int tick = from; tick <= to; tick++) {
-                for (Note note : song.notesAtTick(tick)) {
-                    data.add(new int[]{tick - from, note.layer(), note.key()});
-                }
-            }
-            // [1] :: 구간에 노트가 하나도 없다면? 클립보드 유지
-            if (data.isEmpty()) {
-                msg.send(player, "editor.copy-range-empty",
-                        "from", String.valueOf(from), "to", String.valueOf(to));
-                return;
-            }
-            session.setClipboard(data);
-            msg.send(player, "editor.copy-range-success",
-                    "from", String.valueOf(from), "to", String.valueOf(to),
-                    "count", String.valueOf(data.size()));
+    private void handleRangeToggle(Player player, EditorSession session, int tick, int layer) {
+        if (!session.hasRangeAnchor()) {
+            session.setRangeAnchor(tick, layer);
+            msg.send(player, "editor.range-start", "anchor_tick", String.valueOf(tick));
+            rerender(player, session);
             return;
         }
-
-        // [B] :: 일반 복사. 커서 틱 한 컬럼만
-        int tick = session.anchorTick();
-        for (Note note : song.notesAtTick(tick)) {
-            data.add(new int[]{0, note.layer(), note.key()});
-        }
-        if (data.isEmpty()) {
-            msg.send(player, "editor.copy-empty", "tick", String.valueOf(tick));
-            return;
-        }
-        session.setClipboard(data);
-        msg.send(player, "editor.copy-success",
-                "tick", String.valueOf(tick), "count", String.valueOf(data.size()));
-        // [STOP] :: 복사 끝
+        int from = Math.min(session.rangeAnchorTick(), tick);
+        int to = Math.max(session.rangeAnchorTick(), tick);
+        int selectedLayer = session.rangeAnchorLayer();
+        EditorSession.RangeAction action = session.toggleTickRange(selectedLayer, from, to);
+        session.clearRangeAnchor();
+        msg.send(player, action == EditorSession.RangeAction.ADDED ? "editor.range-added" : "editor.range-removed",
+                "from", String.valueOf(from), "to", String.valueOf(to),
+                "affected", String.valueOf(to - from + 1), "total", String.valueOf(session.selectedTicks().size()));
+        rerender(player, session);
     }
 
-    private void doPaste(Player player, EditorSession session) {
-        // [1] :: 클립보드가 비어있는가?
+    private void clearTickRange(Player player, EditorSession session) {
+        session.clearTickSelection();
+        session.clearRangeAnchor();
+        msg.send(player, "editor.selection-cleared");
+        rerender(player, session);
+    }
+
+    private void doCopy(Player player, EditorSession session) {
+        if (session.selectedCells().isEmpty()) {
+            msg.send(player, "editor.copy-no-selection");
+            return;
+        }
+        int origin = session.selectedTicks().first();
+        List<EditorSession.ClipboardNote> data = new ArrayList<>();
+        List<EditorSession.ClipboardCell> cells = new ArrayList<>();
+        for (EditorSession.SelectedCell cell : session.selectedCells()) {
+            cells.add(new EditorSession.ClipboardCell(cell.tick() - origin, cell.layer()));
+            Note note = session.song().getNote(cell.tick(), cell.layer());
+            if (note != null)
+                data.add(new EditorSession.ClipboardNote(cell.tick() - origin, note.layer(), note.key()));
+        }
+        if (data.isEmpty()) {
+            msg.send(player, "editor.copy-no-notes");
+            return;
+        }
+        session.setClipboard(data, cells);
+        int first = session.selectedTicks().first();
+        int last = session.selectedTicks().last();
+        int noteCount = data.size();
+        int tickCount = session.selectedTicks().size();
+
+        msg.send(player, "editor.copy-success",
+                "tick", String.valueOf(first),
+                "count", String.valueOf(noteCount),
+
+                "ticks", String.valueOf(tickCount),
+                "notes", String.valueOf(noteCount),
+                "from", String.valueOf(first),
+                "to", String.valueOf(last));
+            }
+
+    private void doPaste(Player player, EditorSession session, int base) {
         if (!session.hasClipboard()) {
             msg.send(player, "editor.paste-empty");
             return;
         }
-
-        // [2] :: 기준 틱이 곡 최대 길이를 넘는가?
-        Song song = session.song();
-        int base = session.anchorTick();
         int max = maxTicks();
-        if (base >= max) {
-            msg.send(player, "editor.max-tick", "max", String.valueOf(max));
-            return;
+        List<EditorSession.PasteNote> placements = EditorSession.resolvePaste(
+                session.clipboardNotes(), base, max, session.song().layerCount());
+        for (EditorSession.PasteNote p : placements) session.song().setNote(p.tick(), p.layer(), p.key());
+        NavigableSet<EditorSession.SelectedCell> pastedCells = new TreeSet<>();
+        for (EditorSession.ClipboardCell cell : session.clipboardCells()) {
+            long target = (long) base + cell.relativeTick();
+            if (target >= 0 && target < max && cell.layer() >= 0 && cell.layer() < session.song().layerCount())
+                pastedCells.add(new EditorSession.SelectedCell((int) target, cell.layer()));
         }
-
-        // [3] :: 커서 틱부터 상대 배치. 범위 밖/없는 레이어는 걸러진다
-        List<int[]> placements = EditorSession.resolvePaste(
-                session.clipboard(), base, max, song.layerCount());
-        for (int[] p : placements) {
-            song.setNote(p[0], p[1], p[2]);
-        }
+        session.replaceCellSelection(pastedCells);
+        session.clearRangeAnchor();
+        int skipped = session.clipboardNotes().size() - placements.size();
+        msg.send(player, "editor.paste-result", "pasted", String.valueOf(placements.size()),
+                "skipped", String.valueOf(skipped), "tick", String.valueOf(base));
         rerender(player, session);
-
-        // [4] :: 결과 안내. 일부가 잘렸다면 제외 개수도 표기
-        int skipped = session.clipboard().size() - placements.size();
-        if (skipped > 0) {
-            msg.send(player, "editor.paste-partial",
-                    "tick", String.valueOf(base),
-                    "count", String.valueOf(placements.size()),
-                    "skipped", String.valueOf(skipped));
-        } else {
-            msg.send(player, "editor.paste-success",
-                    "tick", String.valueOf(base), "count", String.valueOf(placements.size()));
-        }
-        // [STOP] :: 붙여넣기 끝
     }
 
     // =================================================================

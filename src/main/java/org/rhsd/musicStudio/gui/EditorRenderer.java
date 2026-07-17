@@ -34,8 +34,8 @@ public final class EditorRenderer {
     public static final int SLOT_PLAY        = 49;
     public static final int SLOT_STOP        = 50;
     public static final int SLOT_SETTINGS    = 51;
-    public static final int SLOT_COPY        = 52;
-    public static final int SLOT_PASTE       = 53;
+    public static final int SLOT_RANGE_HELP  = 52;
+    public static final int SLOT_EDIT_HELP   = 53;
     public static final int SLOT_INFO        = 36;
 
     // 컨트롤/장식 아이콘 Material. 텍스트는 GuiConfig 가, 아이콘은 여기서 관리한다
@@ -45,8 +45,7 @@ public final class EditorRenderer {
     private static final Material MAT_PLAY         = Material.LIME_DYE;
     private static final Material MAT_STOP         = Material.RED_DYE;
     private static final Material MAT_SETTINGS     = Material.COMPARATOR;
-    private static final Material MAT_COPY         = Material.BOOK;
-    private static final Material MAT_PASTE        = Material.WRITABLE_BOOK;
+    private static final Material MAT_HELP         = Material.BOOK;
     private static final Material MAT_EMPTY        = Material.GRAY_STAINED_GLASS_PANE;
     private static final Material MAT_ADD          = Material.LIME_STAINED_GLASS_PANE;
     private static final Material MAT_FILLER       = Material.BLACK_STAINED_GLASS_PANE;
@@ -54,6 +53,7 @@ public final class EditorRenderer {
     private static final Material MAT_RULER        = Material.PAPER;
     private static final Material MAT_RULER_ON     = Material.LIME_DYE;
     private static final Material MAT_RULER_CURSOR = Material.YELLOW_DYE;
+    private static final Material MAT_RULER_ANCHOR = Material.ORANGE_DYE;
 
     private EditorRenderer() {
     }
@@ -87,7 +87,8 @@ public final class EditorRenderer {
                     int slot = base + GRID_COL_START + c;
                     Note note = song.getNote(tick, layerIdx);
                     if (note != null) {
-                        inv.setItem(slot, noteItem(gui, layer, note, session.isSelected(tick, layerIdx)));
+                        inv.setItem(slot, noteItem(gui, layer, note, session.isSelected(tick, layerIdx),
+                                session.isCellSelected(tick, layerIdx)));
                     } else {
                         inv.setItem(slot, emptyCell(gui, session, tick, layerIdx));
                     }
@@ -118,8 +119,8 @@ public final class EditorRenderer {
         button(inv, SLOT_PLAY, MAT_PLAY, gui, "editor.buttons.play");
         button(inv, SLOT_STOP, MAT_STOP, gui, "editor.buttons.stop");
         button(inv, SLOT_SETTINGS, MAT_SETTINGS, gui, "editor.buttons.settings");
-        button(inv, SLOT_COPY, MAT_COPY, gui, "editor.buttons.copy");
-        button(inv, SLOT_PASTE, MAT_PASTE, gui, "editor.buttons.paste");
+        button(inv, SLOT_RANGE_HELP, MAT_HELP, gui, "editor.buttons.range-help", session);
+        button(inv, SLOT_EDIT_HELP, MAT_HELP, gui, "editor.buttons.edit-help", session);
         // [STOP] :: 렌더 끝
     }
 
@@ -129,7 +130,9 @@ public final class EditorRenderer {
         for (int c = 0; c < EditorSession.VISIBLE_TICKS; c++) {
             int tick = tickOffset + c;
             inv.setItem(RULER_ROW * 9 + GRID_COL_START + c,
-                    rulerItem(gui, tick, session.playingTick() == tick, session.cursorTick() == tick));
+                    rulerItem(gui, tick, session.playingTick() == tick,
+                            session.hasRangeAnchor() && session.rangeAnchorTick() == tick,
+                            session.cursorTick() == tick));
         }
     }
 
@@ -157,7 +160,7 @@ public final class EditorRenderer {
         return item(layer.instrument().icon(), name, gui.lore("editor.header.lore", ph));
     }
 
-    private static ItemStack noteItem(GuiConfig gui, Layer layer, Note note, boolean selected) {
+    private static ItemStack noteItem(GuiConfig gui, Layer layer, Note note, boolean selected, boolean tickSelected) {
         String[] ph = {
                 "key_name", note.keyName(),
                 "key", String.valueOf(note.key()),
@@ -167,7 +170,7 @@ public final class EditorRenderer {
         Component name = gui.name(selected ? "editor.note.name-selected" : "editor.note.name", ph);
         ItemStack it = item(layer.instrument().icon(), name, gui.lore("editor.note.lore", ph));
         // 선택된 노트라면? 글린트로 강조
-        if (selected) {
+        if (selected || tickSelected) {
             ItemMeta meta = it.getItemMeta();
             if (meta != null) {
                 ItemCompat.setGlint(meta, true);
@@ -183,7 +186,9 @@ public final class EditorRenderer {
                 "layer", String.valueOf(layer + 1),
                 "key_name", Note.keyName(session.currentKey())
         };
-        return item(MAT_EMPTY, gui.name("editor.empty-cell.name", ph), gui.lore("editor.empty-cell.lore", ph));
+        ItemStack it = item(MAT_EMPTY, gui.name("editor.empty-cell.name", ph), gui.lore("editor.empty-cell.lore", ph));
+        if (session.isCellSelected(tick, layer)) setGlint(it);
+        return it;
     }
 
     private static ItemStack infoItem(GuiConfig gui, Song song, EditorSession session) {
@@ -194,16 +199,22 @@ public final class EditorRenderer {
                 "notes", String.valueOf(song.noteCount()),
                 "layers", String.valueOf(song.layerCount()),
                 "max_layers", String.valueOf(session.maxLayers()),
-                "key_name", Note.keyName(session.currentKey())
+                "key_name", Note.keyName(session.currentKey()),
+                "selected_ticks", String.valueOf(session.selectedTicks().size()),
+                "anchor_tick", session.hasRangeAnchor() ? String.valueOf(session.rangeAnchorTick()) : "-"
         };
         return item(MAT_INFO, gui.name("editor.info.name", ph), gui.lore("editor.info.lore", ph));
     }
 
-    private static ItemStack rulerItem(GuiConfig gui, int tick, boolean playing, boolean cursor) {
+    private static ItemStack rulerItem(GuiConfig gui, int tick, boolean playing, boolean anchor, boolean cursor) {
         String tickStr = String.valueOf(tick);
         // 재생 헤드 표시가 커서 표시보다 우선
         if (playing) {
             return item(MAT_RULER_ON, gui.name("editor.ruler-playing.name", "tick", tickStr), null);
+        }
+        if (anchor) {
+            return item(MAT_RULER_ANCHOR, gui.name("editor.ruler-anchor.name", "tick", tickStr),
+                    gui.lore("editor.ruler-anchor.lore", "tick", tickStr));
         }
         String base = cursor ? "editor.ruler-cursor" : "editor.ruler";
         return item(cursor ? MAT_RULER_CURSOR : MAT_RULER,
@@ -212,6 +223,18 @@ public final class EditorRenderer {
 
     private static void button(Inventory inv, int slot, Material material, GuiConfig gui, String basePath) {
         inv.setItem(slot, item(material, gui.name(basePath + ".name"), gui.lore(basePath + ".lore")));
+    }
+
+    private static void button(Inventory inv, int slot, Material material, GuiConfig gui,
+                               String basePath, EditorSession session) {
+        String[] ph = {"selected_ticks", String.valueOf(session.selectedTicks().size()),
+                "anchor_tick", session.hasRangeAnchor() ? String.valueOf(session.rangeAnchorTick()) : "-"};
+        inv.setItem(slot, item(material, gui.name(basePath + ".name", ph), gui.lore(basePath + ".lore", ph)));
+    }
+
+    private static void setGlint(ItemStack it) {
+        ItemMeta meta = it.getItemMeta();
+        if (meta != null) { ItemCompat.setGlint(meta, true); it.setItemMeta(meta); }
     }
 
     private static ItemStack item(Material material, Component name, List<Component> lore) {

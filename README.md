@@ -71,12 +71,12 @@ The editor is an inventory GUI. Rows are **layers**, columns are **ticks**; the 
 | **Note** | Left: select · Right: +1 semitone · Shift+Right: −1 semitone · Shift+Left: delete |
 | **Layer header** | Left: change instrument · Right: toggle mute · Shift+Left/Right: volume ±10% · Q (drop): delete layer |
 | **Info (jukebox)** | Left: pitch up · Right: pitch down · Shift: by octave — sets the pitch used for new notes |
-| **Ruler (paper)** | Click: put the cursor on that tick (copy/paste anchor) · click again: clear it |
+| **Ruler (paper)** | Click: put the existing editor cursor on that tick · click again: clear it |
 | **◀ / ▶ tick** | Scroll one tick · Shift: jump 8 ticks |
 | **▲ / ▼ layer** | Scroll layers up / down |
 | **▶ preview / ■ stop** | Preview the song to yourself / stop |
 | **Settings** | Tempo and disc extraction |
-| **Copy / paste** | Copy the cursor tick (Shift: all 8 visible ticks) / paste starting at the cursor tick |
+| **Tick ranges** | On an editor cell: F sets range start/end; 1 copies selected ticks; 2 pastes at the hovered tick; 3 clears; Q cancels a pending start. Empty ticks, scrolling, and non-contiguous ranges are supported. |
 | **Music disc item** | Right-click: play · right-click again: stop |
 
 **Instruments (16):** Harp, Bass, Bass Drum, Snare, Hat, Guitar, Flute, Bell, Chime, Xylophone, Iron Xylophone, Cow Bell, Didgeridoo, Bit, Banjo, Pling.
