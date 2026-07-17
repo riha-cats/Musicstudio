@@ -3,7 +3,7 @@
 # =================================================================
 config-version: 5
 
-# 메시지/GUI 언어. 텍스트 파일은 messages_<언어>.yml / gui_<언어>.yml 로 분리된다
+# 메시지/GUI 언어. 텍스트는 language/<언어>.yml 에 있고, 관리자 수정은 messages.yml 에 얹는다
 # 기본 제공: ko_kr(한국어), en_us(영어 — 미번역 문구는 ko_kr로 자동 폴백)
 language: ko_kr
 
@@ -22,7 +22,8 @@ limits:
 
 disc:
   # 음반 베이스 아이템(바닐라 뮤직디스크). itemsadder-id가 비어있을 때 사용
-  material: MUSIC_DISC_5
+  # 디스크가 제 곡명("C418 - strad")을 그리는 툴팁은 추출 시 자동으로 지워진다
+  material: MUSIC_DISC_STRAD
 
   # ItemsAdder 커스텀 아이템 id (예: "myitems:music_disc"). 비워두면 위 material 사용
   # ItemsAdder가 설치되어 있지 않거나 id를 찾지 못하면 자동으로 material로 폴백한다

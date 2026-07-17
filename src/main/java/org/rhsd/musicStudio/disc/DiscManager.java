@@ -52,8 +52,8 @@ public final class DiscManager {
     // config 에서 음반 관련 설정을 다시 읽는다. 리로드 시 호출
     public void reload() {
         FileConfiguration config = plugin.getConfig();
-        this.discMaterial = parseMaterial(plugin, config.getString("disc.material", "MUSIC_DISC_5"),
-                Material.MUSIC_DISC_5, "disc.material");
+        this.discMaterial = parseMaterial(plugin, config.getString("disc.material", "MUSIC_DISC_STRAD"),
+                Material.MUSIC_DISC_STRAD, "disc.material");
         this.itemsAdderId = config.getString("disc.itemsadder-id", "");
         this.glint = config.getBoolean("disc.glint", false);
         this.unbreakable = config.getBoolean("disc.unbreakable", false);
@@ -170,7 +170,13 @@ public final class DiscManager {
             meta.lore(gui.lore("disc.lore", ph));
             meta.getPersistentDataContainer().set(songIdKey, PersistentDataType.STRING, song.id());
 
-            // [3] :: 바닐라 속성 (config)
+            // [3] :: 베이스 뮤직디스크가 제 곡명을 툴팁에 그린다. 우리 lore 만 남기려면 지운다.
+            // 플래그는 1.20.x, jukebox 컴포넌트는 1.21+ 를 덮는다. ItemsAdder 커스텀 등
+            // 뮤직디스크가 아닌 베이스에는 hideJukeboxSong 이 알아서 손대지 않는다
+            ItemCompat.hideExtraTooltip(meta);
+            ItemCompat.hideJukeboxSong(meta, disc.getType());
+
+            // [4] :: 바닐라 속성 (config)
             if (glint) {
                 ItemCompat.setGlint(meta, true);
             }
