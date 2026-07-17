@@ -8,8 +8,9 @@ load: POSTWORLD
 
 authors: [ 리하데스요 ]
 
-# ItemsAdder는 선택적 의존(없어도 동작). 있으면 먼저 로드되도록 보장
-softdepend: [ ItemsAdder ]
+# ItemsAdder(커스텀 음반), Vault(economy 비용)는 선택적 의존(없어도 동작)
+# 있으면 먼저 로드되도록 보장 — 켤 때 economy 프로바이더가 준비돼 있어야 한다
+softdepend: [ ItemsAdder, Vault ]
 
 commands:
   음악스튜디오:

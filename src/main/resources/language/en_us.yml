@@ -1,0 +1,392 @@
+# ___  ___          _      _____ _             _ _
+# |  \/  |         (_)    /  ___| |           | (_)
+# | .  . |_   _ ___ _  ___\ `--.| |_ _   _  __| |_  ___
+# | |\/| | | | / __| |/ __|`--. \ __| | | |/ _` | |/ _ \
+# | |  | | |_| \__ \ | (__/\__/ / |_| |_| | (_| | | (_) |
+# \_|  |_/\__,_|___/_|\___\____/ \__|\__,_|\__,_|_|\___/
+#
+#
+# This file is overwritten every time the plugin starts.
+# To change wording, edit only the keys you need in messages.yml
+# The active language is selected via `language` in config.yml
+
+messages:
+  prefix: "<white>[<gradient:#a18cd1:#fbc2eb>MusicStudio</gradient>]</white> "
+
+  no-permission: "<red>You don't have permission to do that."
+  player-only: "<red>Only players can use this command."
+
+  # =================================================================
+  # Commands
+  # =================================================================
+  command:
+    help-header: "<yellow>MusicStudio Help"
+    help-create: " <gray>•</gray> <yellow>/musicstudio create [name]</yellow> <gray>- Create a new song"
+    help-list: " <gray>•</gray> <yellow>/musicstudio list</yellow> <gray>- View your song list"
+    help-open: " <gray>•</gray> <yellow>/musicstudio open [name]</yellow> <gray>- Open the editor"
+    help-rename: " <gray>•</gray> <yellow>/musicstudio rename [old] [new]</yellow> <gray>- Rename a song"
+    help-disc: " <gray>•</gray> <yellow>/musicstudio disc [name]</yellow> <gray>- Export as a music disc"
+    help-delete: " <gray>•</gray> <yellow>/musicstudio delete [name]</yellow> <gray>- Delete a song"
+    create-success: "<green>Created song '<white><name></white>'. Use /musicstudio open <name> to edit it."
+    create-name-invalid: "<red>Names must be 1-<max> characters with no spaces."
+    create-name-taken: "<red>A song with that name already exists: <white><name>"
+    create-limit: "<red>You can only have up to <white><max></white> songs."
+    create-usage: "<yellow>Usage: /musicstudio create [name]"
+    list-empty: "<gray>You don't have any songs yet. Use /musicstudio create [name] to make one."
+    list-header: "<yellow>Your Songs (<count>)"
+    list-entry: "<gray> - <white><name></white> <gray>(<layers> layers, <notes> notes)"
+    not-found: "<red>Song not found: <white><name>"
+    delete-success: "<green>Deleted song '<white><name></white>'."
+    delete-fail: "<red>Failed to delete: <white><name>"
+    delete-not-owner: "<red>You can only delete your own songs."
+    delete-usage: "<yellow>Usage: /musicstudio delete [name]"
+    rename-success: "<green>Renamed: <white><old></white> → <white><new>"
+    rename-taken: "<red>A song with that name already exists: <white><name>"
+    rename-not-owner: "<red>You can only rename your own songs."
+    rename-usage: "<yellow>Usage: /musicstudio rename [old name] [new name]"
+    open-usage: "<yellow>Usage: /musicstudio open [name]"
+    disc-usage: "<yellow>Usage: /musicstudio disc [name]"
+    disc-not-owner: "<red>You can only export your own songs."
+    disc-empty-song: "<red>Can't export an empty song. Add some notes first."
+    disc-success: "<green>Disc exported: <white><name>"
+    disc-cost-insufficient: "<red>You don't have enough to cover the cost. (<white><cost></white> required)"
+    disc-cost-economy-unavailable: "<red>An integration error occurred. Please contact an admin."
+
+  # =================================================================
+  # Editor
+  # =================================================================
+  editor:
+    layer-move-selected: "<yellow>Selected the layer at position <white><layer></white>. Press F on the destination layer's header."
+    layer-move-cancelled: "<gray>Cancelled moving the layer at position <white><layer></white>."
+    layer-moved: "<green>Moved layer from position <white><from></white> to position <white><to></white>."
+    layer-move-invalid: "<red>Can't move that layer. The position is no longer valid."
+    no-notes: "<gray>There are no notes to play."
+    play-start: "<green>▶ Preview started"
+    play-stop: "<gray>■ Stopped"
+    range-start: "<yellow>Set tick <white><anchor_tick></white> as the range start. Shift+left-click the end cell."
+    range-cancelled: "<gray>Cancelled the pending range start."
+    range-added: "<green>Added ticks <white><from>~<to></white> (<affected> ticks). <white><total></white> ticks selected in total."
+    range-removed: "<yellow>Removed ticks <white><from>~<to></white> (<affected> ticks). <white><total></white> ticks selected in total."
+    selection-cleared: "<gray>Cleared the completed tick selection and any pending range start."
+    copy-no-selection: "<red>No cells selected. Shift+left-click on note cells to select a range."
+    copy-no-notes: "<gray>No notes on the selected ticks, so the existing clipboard was kept."
+    copy-success: "<green>Copied <white><notes></white> notes from <white><ticks></white> selected ticks. (<from>~<to>)"
+    paste-target-set: "<aqua>Set tick <white><tick></white> as the paste target. Press the paste button."
+    paste-target-cleared: "<gray>Cleared the paste target."
+    paste-no-target: "<red>No paste target set. Click a tick banner below to set one first."
+    tempo-reset: "<aqua>Reset tempo to default (<white><tempo></white> ticks per cell)."
+    song-gone: "<red>That song has already been deleted. The list has been refreshed."
+    paste-empty: "<gray>Clipboard is empty. Copy something first."
+    paste-result: "<green>Pasted <white><pasted></white> notes at tick <white><tick></white>, skipped <white><skipped></white>."
+    max-tick: "<red>Reached the song's maximum length (<white><max></white> cells)."
+    disc-extracted: "<green>Disc exported: <white><name>"
+    disc-empty: "<red>Can't export an empty song."
+    layer-deleted: "<green>Deleted layer <white><layer></white>."
+    layer-min: "<red>Can't delete the last layer."
+
+  # =================================================================
+  # Disc Playback
+  # =================================================================
+  disc:
+    play-start: "<green>▶ Playing: <white><name>"
+    play-stop: "<red>■ Stopped: <white><name>"
+    not-found: "<red>Song data not found."
+    empty: "<gray>This song is empty. Add some notes first."
+
+  # =================================================================
+  # Admin
+  # =================================================================
+  admin:
+    help-header: "<aqua>===== Admin ====="
+    help-import: "<yellow>/musicstudio admin import [file.nbs]</yellow> <gray>- Import an NBS song"
+    help-reload: "<yellow>/musicstudio admin reload</yellow> <gray>- Reload songs/config"
+    import-success: "<green>Import complete: <white><name>"
+    import-fail: "<red>Import failed: <white><error>"
+    import-warning: "<gray> · <warning>"
+    import-no-file: "<red>File not found: <white><file>"
+    import-list-header: "<aqua>Files available to import:"
+    import-list-entry: "<gray> - <white><file>"
+    import-no-files: "<gray>No .nbs files found in the import folder."
+    import-usage: "<yellow>Usage: /musicstudio admin import [filename.nbs]"
+    reload-success: "<green>Reloaded song and config data."
+
+  # =================================================================
+  # Update Notice
+  # =================================================================
+  update:
+    available: "<yellow>A new version <white><latest></white> is available. (current: <current>) <aqua><url>"
+
+gui:
+  editor:
+    # <song>
+    title: "<light_purple>♪ <song>"
+
+    header:
+      # <n>=layer number, <layer_name>, <instrument>, <volume>, <muted>(mute indicator), <total>
+      name: "<gray>• <white>Layer <n>"
+      name-muted: "<dark_gray>Layer <n>"
+      name-moving: "<gold>Moving Layer <n>"
+      lore:
+        - "<gray><bold>| <reset> <white>Position: <n> / <total>"
+        - "<gray><bold>| <reset> <gray>Instrument: <instrument>"
+        - "<gray><bold>| <reset> <gray>Volume: <volume>%<muted>"
+        - ""
+        - "<yellow><bold>| <reset> <yellow>Left-click: change instrument"
+        - "<yellow><bold>| <reset> <yellow>Right-click: toggle mute"
+        - "<yellow><bold>| <reset> <yellow>Shift+left/right-click: volume ±10%"
+        - "<aqua><bold>| <reset> <aqua>F: start moving layer / select destination"
+        - "<red><bold>| <reset> <red>Q (drop): delete layer"
+      lore-moving:
+        - "<gray><bold>| <reset> <gold>Moving Layer <n>"
+        - "<gray><bold>| <reset> <white>Position: <n> / <total>"
+        - "<gray><bold>| <reset> <gray>F: move to another layer header's position"
+        - "<gray><bold>| <reset> <gray>F on the same layer: cancel move"
+
+    note:
+      # <key_name>, <key>, <tick>, <layer>
+      name: "<green><key_name>"
+      name-selected: "<gold>★ <key_name>"
+      lore:
+        - "<aqua><bold>| <reset> <aqua>Note: <key_name> (key <key>)"
+        - "<gray><bold>| <reset> <gray>Tick <tick> / Layer <layer>"
+        - ""
+        - "<yellow><bold>| <reset> <yellow>Left-click: select (apply this pitch to new notes)"
+        - "<yellow><bold>| <reset> <yellow>Right-click: pitch up / Shift+right-click: pitch down"
+        - "<aqua><bold>| <reset> <aqua>Shift+left-click: start/end range selection"
+        - "<red><bold>| <reset> <red>Q (drop): delete"
+
+    empty-cell:
+      # <tick>, <layer>, <key_name>(current pitch)
+      name: "<dark_gray> •"
+      lore:
+        - "<gray><bold>| <reset> <dark_gray>Tick <tick> / Layer <layer>"
+        - "<gray><bold>| <reset> <gray>Left-click: create a <key_name> note"
+        - "<aqua><bold>| <reset> <aqua>Shift+left-click: start/end range selection"
+
+    add-layer:
+      name: "<green>+ Add Layer"
+      lore:
+        - "<gray>Click to add a new layer"
+
+    info:
+      # <song>, <tempo>, <length>, <notes>, <layers>, <max_layers>, <key_name>
+      name: "<light_purple>♪ <song>"
+      lore:
+        - "<gray><bold>| <reset> <gray>Tempo: <tempo> ticks per cell"
+        - "<gray><bold>| <reset> <gray>Length: <length> cells / <notes> notes"
+        - "<gray><bold>| <reset> <gray>Layers: <layers> / <max_layers>"
+        - ""
+        - "<aqua><bold>| <reset> <aqua>New note pitch: <key_name>"
+        - "<aqua><bold>| <reset> <aqua>Selected ticks: <selected_ticks> · Range start: <anchor_tick>"
+        - "<yellow><bold>| <reset> <yellow>Left-click: pitch up  Right-click: pitch down (Shift: octave)"
+
+    # <tick>
+    ruler:
+      name: "<white>Tick <tick>"
+      lore:
+        - "<gray><bold>| <reset> <gray>Click: paste here"
+        - "<dark_gray><bold>| <reset> <dark_gray>To select, Shift+left-click note cells"
+    ruler-selected:
+      name: "<yellow>■ Tick <tick> (selected)"
+      lore:
+        - "<gray><bold>| <reset> <gray>The copy button will take this tick"
+        - "<dark_gray><bold>| <reset> <dark_gray>Right-click the copy button to clear the whole selection"
+    ruler-paste:
+      name: "<aqua>▼ Tick <tick> (paste here)"
+      lore:
+        - "<gray><bold>| <reset> <gray>The paste button will paste at this spot"
+        - "<dark_gray><bold>| <reset> <dark_gray>Click again to clear"
+    ruler-playing:
+      name: "<green>▶ Tick <tick>"
+    ruler-anchor:
+      name: "<gold>◆ Tick <tick> (range start — waiting for end point)"
+      lore: ["<gray><bold>| <reset> <gray>Shift+left-click another note cell to select everything in between", "<dark_gray><bold>| <reset> <dark_gray>Right-click the copy button to cancel"]
+
+    filler:
+      name: "<dark_gray> "
+
+    buttons:
+      prev-tick:
+        name: "<aqua>◀ Previous Tick"
+        lore: [ "<gray><bold>| <reset> <gray>Scroll left", "<gray><bold>| <reset> <gray>Shift: jump 8 ticks" ]
+      next-tick:
+        name: "<aqua>Next Tick ▶"
+        lore: [ "<gray><bold>| <reset> <gray>Scroll right", "<gray><bold>| <reset> <gray>Shift: jump 8 ticks" ]
+      up-layer:
+        name: "<yellow>▲ Layer Up"
+        lore: [ "<gray><bold>| <reset> <gray>View the layer above" ]
+      down-layer:
+        name: "<yellow>▼ Layer Down"
+        lore: [ "<gray><bold>| <reset> <gray>View the layer below" ]
+      play:
+        name: "<green>▶ Preview"
+        lore: [ "<gray><bold>| <reset> <gray>Only you will hear this", "<gray><bold>| <reset> <gray>Press again to stop" ]
+      stop:
+        name: "<red>■ Stop"
+        lore: [ "<gray><bold>| <reset> <gray>Stops the preview" ]
+      settings:
+        name: "<gold>Settings"
+        lore: [ "<gray><bold>| <reset> <gray>Opens the settings menu" ]
+      output:
+        name: "<light_purple>Export Disc"
+        lore: [ "<gray><bold>| <reset> <gray>Opens the export menu", "<dark_gray><bold>| <reset> <dark_gray>Check the price before deciding" ]
+      copy:
+        name: "<white>Copy"
+        lore:
+          - "<gray><bold>| <reset> <gray>Copies the selected cells"
+          - "<yellow><bold>| <reset> <yellow>Right-click: clear the entire selection"
+          - "<dark_gray><bold>| <reset> <dark_gray>Shift+left-click twice on note cells to select a range"
+          - "<gray><bold>| <reset> <gray>Selected: <selected_ticks> ticks · Pending start: <anchor_tick>"
+      paste:
+        name: "<white>Paste"
+        lore:
+          - "<gray><bold>| <reset> <gray>Pastes at the blue banner's position"
+          - "<aqua><bold>| <reset> <aqua>Paste tick: <paste_tick>"
+          - "<dark_gray><bold>| <reset> <dark_gray>Click a tick banner to set the position"
+
+  # =================================================================
+  # Song List (Main GUI)
+  # =================================================================
+  song-list:
+    title: "<dark_purple>♪ Music Studio"
+    border:
+      name: "<dark_gray> "
+    # <song>, <size>=file size, <notes>=note count (comma-separated), <layers>, <length>
+    entry:
+      name: "<light_purple>♪ <song>"
+      lore:
+        - "<yellow><bold>| <reset> <yellow>Left-click to open"
+        - "<gray><bold>| <reset> <gray>"
+        - "<gray><bold>| <reset> <gray>Size: <size>"
+        - "<gray><bold>| <reset> <gray>Notes: <notes>"
+    # <page>=current page, <pages>=total pages, <total>=song count
+    page-info:
+      name: "<gold>Page <page> of <pages>"
+      lore:
+        - "<gray><bold>| <reset> <gray>Your songs: <total>"
+    prev-page:
+      name: "<aqua>◀ Previous Page"
+      lore: [ "<gray><bold>| <reset> <gray>Page <page> / <pages>" ]
+    next-page:
+      name: "<aqua>Next Page ▶"
+      lore: [ "<gray><bold>| <reset> <gray>Page <page> / <pages>" ]
+
+  # =================================================================
+  # Instrument Selection Menu
+  # =================================================================
+  instrument:
+    # <n>=layer number
+    title: "<dark_aqua>Select Instrument — Layer <n>"
+    # <instrument>
+    entry:
+      name: "<white><instrument>"
+      lore: [ "<gray><bold>| <reset> <gray>Click to select" ]
+    entry-current:
+      name: "<gold><instrument>"
+      lore: [ "<gold><bold>| <reset> <gold>Currently applied instrument" ]
+    # Instrument names. Keys are the Instrument enum names in lowercase.
+    # These are substituted directly into <instrument>, so no color tags here.
+    names:
+      # 16 note block instruments
+      harp: "Harp"
+      bass: "Bass"
+      basedrum: "Bass Drum"
+      snare: "Snare"
+      hat: "Hi-Hat"
+      guitar: "Guitar"
+      flute: "Flute"
+      bell: "Bell"
+      chime: "Chime"
+      xylophone: "Xylophone"
+      iron_xylophone: "Iron Xylophone"
+      cow_bell: "Cow Bell"
+      didgeridoo: "Didgeridoo"
+      bit: "Bit"
+      banjo: "Banjo"
+      pling: "Pling"
+      # Sounds from mobs placed on a note block
+      creeper: "Creeper"
+      ender_dragon: "Ender Dragon"
+      piglin: "Piglin"
+      skeleton: "Skeleton"
+      wither_skeleton: "Wither Skeleton"
+      zombie: "Zombie"
+
+  # =================================================================
+  # Settings Menu
+  # =================================================================
+  settings:
+    # <song>
+    title: "<gold>Settings - <song>"
+    filler:
+      name: "<dark_gray> "
+    # <song>, <tempo>, <length>, <notes>, <layers>, <cells_per_sec>
+    info:
+      name: "<light_purple>♪ <song>"
+      lore:
+        - "<gray><bold>| <reset> <gray>Tempo: <tempo> ticks per cell (<cells_per_sec> cells/sec)"
+        - "<gray><bold>| <reset> <gray>Length: <length> cells / <notes> notes"
+        - "<gray><bold>| <reset> <gray>Layers: <layers>"
+    # <tempo>, <max>, <min>, <default>, <cells_per_sec>
+    tempo-down:
+      name: "<red>◀ Slower"
+      lore:
+        - "<gray><bold>| <reset> <gray>+1 tick per cell (slower)"
+        - "<gray><bold>| <reset> <gray>Current: <tempo> ticks per cell"
+        - "<gray><bold>| <reset> <gray>Max <max> ticks/cell"
+    tempo-up:
+      name: "<green>Faster ▶"
+      lore:
+        - "<gray><bold>| <reset> <gray>-1 tick per cell (faster)"
+        - "<gray><bold>| <reset> <gray>Current: <tempo> ticks per cell"
+        - "<gray><bold>| <reset> <gray>Min <min> ticks/cell"
+    tempo-reset:
+      name: "<aqua>Default Tempo"
+      lore:
+        - "<gray><bold>| <reset> <gray>Resets to <default> ticks per cell"
+        - "<gray><bold>| <reset> <gray>Current: <tempo> ticks per cell"
+    back:
+      name: "<yellow>← Back to Editor"
+      lore:
+        - "<gray><bold>| <reset> <gray>Return to the editing screen"
+
+  # =================================================================
+  # Disc Export Menu
+  # =================================================================
+  output:
+    # <song>
+    title: "<light_purple>Export Disc — <song>"
+    filler:
+      name: "<dark_gray> "
+    # <cost>=cost display ("EMERALD x5" or a currency amount), <length>, <notes>, <layers>
+    price:
+      name: "<gold>▶ <gold>Price: <cost>"
+      lore:
+        - "<gray><bold>| <reset> <gray>Cost to export this song as a music disc"
+        - "<gray><bold>| <reset> <gray>Length <length> cells · <notes> notes · <layers> layers"
+    price-free:
+      name: "<gold>▶ Price: Free"
+      lore:
+        - "<gray><bold>| <reset> <gray>This server doesn't charge for exports"
+        - "<gray><bold>| <reset> <gray>Length <length> cells · <notes> notes · <layers> layers"
+    buy:
+      name: "<green>Export"
+      lore:
+        - "<gray><bold>| <reset> <gray>Click to receive the disc"
+        - "<gray><bold>| <reset> <gray>Anyone can play an exported disc"
+    back:
+      name: "<yellow>← Back to Editor"
+      lore:
+        - "<gray><bold>| <reset> <gray>Return without exporting"
+
+  # =================================================================
+  # Disc Item
+  # =================================================================
+  disc:
+    # <song>, <layers>, <notes>, <cells>
+    name: "<light_purple>♪ <song>"
+    lore:
+      - "<dark_gray><bold>| <reset> <dark_gray>Made with MusicStudio"
+      - "<gray><bold>| <reset> <gray><layers> layers · <notes> notes · <cells> cells"
+      - ""
+      - "<yellow><bold>| <reset> <yellow>Right-click: play / right-click again: stop"

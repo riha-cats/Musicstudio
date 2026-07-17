@@ -122,7 +122,9 @@ public final class NbsImporter {
                         outOfRange++;
                     }
                     int ourKey = Note.clampKey(key - NBS_KEY_OFFSET);
-                    int inst = instrument >= 0 && instrument < Instrument.values().length ? instrument : 0;
+                    // 16 이상은 이 파일이 자체 정의한 커스텀 사운드다. 우리 악기로 옮길 수 없어 하프로 떨군다
+                    // (values().length 로 재면 뒤에 붙은 머리 악기가 커스텀 자리를 먹는다)
+                    int inst = instrument >= 0 && instrument < Instrument.VANILLA_COUNT ? instrument : 0;
                     notes.add(new int[]{tick, layer, inst, ourKey});
                     firstInstrument.putIfAbsent(layer, inst);
                     if (layer > maxLayer) {

@@ -34,7 +34,7 @@ public final class GuiListener implements Listener {
                 return;
             }
             if (event.getWhoClicked() instanceof Player player) {
-                gui.handleEditorClick(player, event.getRawSlot(), event.getClick(), event.getHotbarButton());
+                gui.handleEditorClick(player, event.getRawSlot(), event.getClick());
             }
         }
         // [B] :: 악기 선택 메뉴인가?
@@ -55,6 +55,26 @@ public final class GuiListener implements Listener {
             }
             if (event.getWhoClicked() instanceof Player player) {
                 gui.handleSettingsClick(player, menu, event.getRawSlot());
+            }
+        }
+        // [D] :: 곡 목록 메뉴인가?
+        else if (holder instanceof SongListMenu menu) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != top) {
+                return;
+            }
+            if (event.getWhoClicked() instanceof Player player) {
+                gui.handleSongListClick(player, menu, event.getRawSlot());
+            }
+        }
+        // [E] :: 음반 추출 메뉴인가?
+        else if (holder instanceof OutputMenu menu) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != top) {
+                return;
+            }
+            if (event.getWhoClicked() instanceof Player player) {
+                gui.handleOutputClick(player, menu, event.getRawSlot());
             }
         }
     }

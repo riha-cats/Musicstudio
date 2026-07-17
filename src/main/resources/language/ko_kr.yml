@@ -1,0 +1,392 @@
+# ___  ___          _      _____ _             _ _
+# |  \/  |         (_)    /  ___| |           | (_)
+# | .  . |_   _ ___ _  ___\ `--.| |_ _   _  __| |_  ___
+# | |\/| | | | / __| |/ __|`--. \ __| | | |/ _` | |/ _ \
+# | |  | | |_| \__ \ | (__/\__/ / |_| |_| | (_| | | (_) |
+# \_|  |_/\__,_|___/_|\___\____/ \__|\__,_|\__,_|_|\___/
+#
+#
+# 이 파일은 플러그인이 켜질 때마다 덮어씁니다.
+# 문구를 바꾸려면 messages.yml 에 바꿀 키만 적으세요
+# 활성 언어는 config.yml 의 language 로 고릅니다
+
+messages:
+  prefix: "<white>[<gradient:#a18cd1:#fbc2eb>음악스튜디오</gradient>]</white> "
+
+  no-permission: "<red>권한이 없습니다."
+  player-only: "<red>플레이어만 사용할 수 있습니다."
+
+  # =================================================================
+  # 명령어
+  # =================================================================
+  command:
+    help-header: "<yellow>음악스튜디오 도움말"
+    help-create: " <gray>•</gray> <yellow>/음악스튜디오 생성 [이름]</yellow> <gray>- 새 곡을 생성합니다"
+    help-list: " <gray>•</gray> <yellow>/음악스튜디오 목록</yellow> <gray>- 내 곡 목록을 봅니다"
+    help-open: " <gray>•</gray> <yellow>/음악스튜디오 열기 [이름]</yellow> <gray>- 에디터를 엽니다"
+    help-rename: " <gray>•</gray> <yellow>/음악스튜디오 이름변경 [기존] [새 이름]</yellow> <gray>- 곡 이름을 변경합니다"
+    help-disc: " <gray>•</gray> <yellow>/음악스튜디오 음반 [이름]</yellow> <gray>- 음반으로 추출합니다"
+    help-delete: " <gray>•</gray> <yellow>/음악스튜디오 삭제 [이름]</yellow> <gray>- 곡을 삭제합니다"
+    create-success: "<green>곡 '<white><name></white>'을(를) 만들었습니다. /음악스튜디오 열기 <name> 으로 편집하세요."
+    create-name-invalid: "<red>이름은 1~<max>자까지만 공백 없이 입력할 수 있습니다."
+    create-name-taken: "<red>같은 이름의 곡이 이미 있습니다: <white><name>"
+    create-limit: "<red>곡은 최대 <white><max></white>개까지 만들 수 있습니다."
+    create-usage: "<yellow>사용법: /음악스튜디오 생성 [이름]"
+    list-empty: "<gray>저장된 곡이 없습니다. /음악스튜디오 생성 [이름] 으로 만드세요."
+    list-header: "<yellow>내 곡 목록 (<count>개)"
+    list-entry: "<gray> - <white><name></white> <gray>(레이어 <layers>, 노트 <notes>)"
+    not-found: "<red>곡을 찾을 수 없습니다: <white><name>"
+    delete-success: "<green>곡 '<white><name></white>'을(를) 삭제했습니다."
+    delete-fail: "<red>삭제에 실패했습니다: <white><name>"
+    delete-not-owner: "<red>본인 소유 곡만 삭제할 수 있습니다."
+    delete-usage: "<yellow>사용법: /음악스튜디오 삭제 [이름]"
+    rename-success: "<green>이름 변경: <white><old></white> → <white><new>"
+    rename-taken: "<red>같은 이름의 곡이 이미 있습니다: <white><name>"
+    rename-not-owner: "<red>본인 소유 곡만 이름을 변경할 수 있습니다."
+    rename-usage: "<yellow>사용법: /음악스튜디오 이름변경 [기존이름] [새이름]"
+    open-usage: "<yellow>사용법: /음악스튜디오 열기 [이름]"
+    disc-usage: "<yellow>사용법: /음악스튜디오 음반 [이름]"
+    disc-not-owner: "<red>본인 소유 곡만 음반으로 추출할 수 있습니다."
+    disc-empty-song: "<red>빈 곡은 추출할 수 없습니다. 노트를 먼저 추가하세요."
+    disc-success: "<green>음반 추출 완료: <white><name>"
+    disc-cost-insufficient: "<red>비용이 부족합니다. (<white><cost></white> 필요)"
+    disc-cost-economy-unavailable: "<red>연동 오류가 발생했습니다. 관리자에게 문의하세요."
+
+  # =================================================================
+  # 에디터
+  # =================================================================
+  editor:
+    layer-move-selected: "<yellow>현재 <white><layer></white>번 위치의 레이어를 선택했습니다. 목적지 레이어 헤더에서 F를 누르세요."
+    layer-move-cancelled: "<gray><white><layer></white>번 위치 레이어의 이동을 취소했습니다."
+    layer-moved: "<green>레이어를 <white><from></white>번 위치에서 <white><to></white>번 위치로 이동했습니다."
+    layer-move-invalid: "<red>레이어를 이동할 수 없습니다. 위치가 더 이상 유효하지 않습니다."
+    no-notes: "<gray>재생할 노트가 없습니다."
+    play-start: "<green>▶ 미리듣기 시작"
+    play-stop: "<gray>■ 정지"
+    range-start: "<yellow>틱 <white><anchor_tick></white>을 범위 시작으로 잡았습니다. 끝낼 칸에서 Shift+좌클릭 하세요."
+    range-cancelled: "<gray>대기 중인 범위 시작을 취소했습니다."
+    range-added: "<green>틱 <white><from>~<to></white>를 추가했습니다 (<affected>틱). 총 <white><total></white>틱 선택됨."
+    range-removed: "<yellow>틱 <white><from>~<to></white>를 제거했습니다 (<affected>틱). 총 <white><total></white>틱 선택됨."
+    selection-cleared: "<gray>완료된 틱 선택과 대기 중인 범위 시작을 모두 지웠습니다."
+    copy-no-selection: "<red>선택한 칸이 없습니다. 편집 칸에서 Shift+좌클릭으로 구간을 잡으세요."
+    copy-no-notes: "<gray>선택한 틱에 노트가 없어 기존 클립보드를 유지했습니다."
+    copy-success: "<green>선택한 <white><ticks></white>틱에서 노트 <white><notes></white>개를 복사했습니다. (<from>~<to>)"
+    paste-target-set: "<aqua>틱 <white><tick></white>에 붙여넣도록 지정했습니다. 붙여넣기 버튼을 누르세요."
+    paste-target-cleared: "<gray>붙여넣을 자리를 해제했습니다."
+    paste-no-target: "<red>붙여넣을 자리가 없습니다. 아래 틱 배너를 클릭해 자리를 먼저 정하세요."
+    tempo-reset: "<aqua>템포를 기본값(셀당 <white><tempo></white>틱)으로 되돌렸습니다."
+    song-gone: "<red>그 곡은 이미 삭제되었습니다. 목록을 갱신했습니다."
+    paste-empty: "<gray>클립보드가 비어 있습니다. 먼저 복사하세요."
+    paste-result: "<green>틱 <white><tick></white> 기준으로 <white><pasted></white>개 붙여넣음, <white><skipped></white>개 건너뜀."
+    max-tick: "<red>곡 최대 길이(<white><max></white>셀)에 도달했습니다."
+    disc-extracted: "<green>음반 추출 완료: <white><name>"
+    disc-empty: "<red>빈 곡은 추출할 수 없습니다."
+    layer-deleted: "<green>레이어 <white><layer></white>를 삭제했습니다."
+    layer-min: "<red>마지막 레이어는 삭제할 수 없습니다."
+
+  # =================================================================
+  # 음반 재생
+  # =================================================================
+  disc:
+    play-start: "<green>▶ 재생: <white><name>"
+    play-stop: "<red>■ 정지: <white><name>"
+    not-found: "<red>곡 데이터를 찾을 수 없습니다."
+    empty: "<gray>빈 곡입니다. 노트를 먼저 추가하세요."
+
+  # =================================================================
+  # 관리자
+  # =================================================================
+  admin:
+    help-header: "<aqua>===== 관리자 ====="
+    help-import: "<yellow>/음악스튜디오 관리자 임포트 [파일.nbs]</yellow> <gray>- NBS 곡 임포트"
+    help-reload: "<yellow>/음악스튜디오 관리자 리로드</yellow> <gray>- 곡/설정 리로드"
+    import-success: "<green>임포트 완료: <white><name>"
+    import-fail: "<red>임포트 실패: <white><error>"
+    import-warning: "<gray> · <warning>"
+    import-no-file: "<red>파일이 없습니다: <white><file>"
+    import-list-header: "<aqua>임포트 가능한 파일:"
+    import-list-entry: "<gray> - <white><file>"
+    import-no-files: "<gray>import 폴더에 .nbs 파일이 없습니다."
+    import-usage: "<yellow>사용법: /음악스튜디오 관리자 임포트 [파일명.nbs]"
+    reload-success: "<green>곡/설정 데이터를 다시 불러왔습니다."
+
+  # =================================================================
+  # 업데이트 알림
+  # =================================================================
+  update:
+    available: "<yellow>새 버전 <white><latest></white> 이(가) 나왔습니다. (현재 <current>) <aqua><url>"
+
+gui:
+  editor:
+    # <song>
+    title: "<light_purple>♪ <song>"
+
+    header:
+      # <n>=레이어번호, <layer_name>, <instrument>, <volume>, <muted>(음소거 표시), <total>
+      name: "<gray>• <white>레이어 <n>"
+      name-muted: "<dark_gray>레이어 <n>"
+      name-moving: "<gold>이동 중인 레이어 <n>"
+      lore:
+        - "<gray><bold>| <reset> <white>현재 위치: <n> / <total>"
+        - "<gray><bold>| <reset> <gray>악기: <instrument>"
+        - "<gray><bold>| <reset> <gray>볼륨: <volume>%<muted>"
+        - ""
+        - "<yellow><bold>| <reset> <yellow>좌클릭: 악기 변경"
+        - "<yellow><bold>| <reset> <yellow>우클릭: 음소거 토글"
+        - "<yellow><bold>| <reset> <yellow>Shift+좌/우클릭: 볼륨 ±10%"
+        - "<aqua><bold>| <reset> <aqua>F: 레이어 이동 시작 / 이동할 위치 선택"
+        - "<red><bold>| <reset> <red>Q키(드롭): 레이어 삭제"
+      lore-moving:
+        - "<gray><bold>| <reset> <gold>이동 중인 레이어 <n>"
+        - "<gray><bold>| <reset> <white>현재 위치: <n> / <total>"
+        - "<gray><bold>| <reset> <gray>F: 다른 레이어 헤더의 위치로 이동"
+        - "<gray><bold>| <reset> <gray>같은 레이어에서 F: 이동 취소"
+
+    note:
+      # <key_name>, <key>, <tick>, <layer>
+      name: "<green><key_name>"
+      name-selected: "<gold>★ <key_name>"
+      lore:
+        - "<aqua><bold>| <reset> <aqua>음: <key_name> (key <key>)"
+        - "<gray><bold>| <reset> <gray>틱 <tick> / 레이어 <layer>"
+        - ""
+        - "<yellow><bold>| <reset> <yellow>좌클릭: 선택 (이 음높이를 새 노트에 적용)"
+        - "<yellow><bold>| <reset> <yellow>우클릭: 반음 ↑ / Shift+우클릭: 반음 ↓"
+        - "<aqua><bold>| <reset> <aqua>Shift+좌클릭: 범위 선택 시작/끝"
+        - "<red><bold>| <reset> <red>Q키(드롭): 삭제"
+
+    empty-cell:
+      # <tick>, <layer>, <key_name>(현재 음높이)
+      name: "<dark_gray> •"
+      lore:
+        - "<gray><bold>| <reset> <dark_gray>틱 <tick> / 레이어 <layer>"
+        - "<gray><bold>| <reset> <gray>좌클릭: <key_name> 노트 생성"
+        - "<aqua><bold>| <reset> <aqua>Shift+좌클릭: 범위 선택 시작/끝"
+
+    add-layer:
+      name: "<green>+ 레이어 추가"
+      lore:
+        - "<gray>클릭하여 새 레이어 추가"
+
+    info:
+      # <song>, <tempo>, <length>, <notes>, <layers>, <max_layers>, <key_name>
+      name: "<light_purple>♪ <song>"
+      lore:
+        - "<gray><bold>| <reset> <gray>템포: 셀당 <tempo>틱"
+        - "<gray><bold>| <reset> <gray>길이: <length>셀 / 노트 <notes>개"
+        - "<gray><bold>| <reset> <gray>레이어: <layers> / <max_layers>"
+        - ""
+        - "<aqua><bold>| <reset> <aqua>새 노트 음높이: <key_name>"
+        - "<aqua><bold>| <reset> <aqua>선택 틱: <selected_ticks> · 범위 시작: <anchor_tick>"
+        - "<yellow><bold>| <reset> <yellow>좌클릭: 음↑ 우클릭: 음↓ (Shift: 옥타브)"
+
+    # <tick>
+    ruler:
+      name: "<white>틱 <tick>"
+      lore:
+        - "<gray><bold>| <reset> <gray>클릭: 여기에 붙여넣기"
+        - "<dark_gray><bold>| <reset> <dark_gray>선택은 편집 칸에서 Shift+좌클릭"
+    ruler-selected:
+      name: "<yellow>■ 틱 <tick> (선택됨)"
+      lore:
+        - "<gray><bold>| <reset> <gray>복사 버튼이 이 틱을 가져갑니다"
+        - "<dark_gray><bold>| <reset> <dark_gray>복사 버튼 우클릭으로 전체 해제"
+    ruler-paste:
+      name: "<aqua>▼ 틱 <tick> (여기에 붙여넣기)"
+      lore:
+        - "<gray><bold>| <reset> <gray>붙여넣기 버튼이 이 자리에 붙입니다"
+        - "<dark_gray><bold>| <reset> <dark_gray>다시 클릭하면 해제"
+    ruler-playing:
+      name: "<green>▶ 틱 <tick>"
+    ruler-anchor:
+      name: "<gold>◆ 틱 <tick> (범위 시작 — 끝점 대기 중)"
+      lore: ["<gray><bold>| <reset> <gray>다른 편집 칸에서 Shift+좌클릭하면 그 사이가 전부 선택됩니다", "<dark_gray><bold>| <reset> <dark_gray>복사 버튼 우클릭으로 취소"]
+
+    filler:
+      name: "<dark_gray> "
+
+    buttons:
+      prev-tick:
+        name: "<aqua>◀ 이전 틱"
+        lore: [ "<gray><bold>| <reset> <gray>왼쪽으로 스크롤", "<gray><bold>| <reset> <gray>Shift: 8틱 점프" ]
+      next-tick:
+        name: "<aqua>다음 틱 ▶"
+        lore: [ "<gray><bold>| <reset> <gray>오른쪽으로 스크롤", "<gray><bold>| <reset> <gray>Shift: 8틱 점프" ]
+      up-layer:
+        name: "<yellow>▲ 레이어 위"
+        lore: [ "<gray><bold>| <reset> <gray>위 레이어 보기" ]
+      down-layer:
+        name: "<yellow>▼ 레이어 아래"
+        lore: [ "<gray><bold>| <reset> <gray>아래 레이어 보기" ]
+      play:
+        name: "<green>▶ 미리듣기"
+        lore: [ "<gray><bold>| <reset> <gray>나에게만 재생됩니다", "<gray><bold>| <reset> <gray>다시 누르면 정지" ]
+      stop:
+        name: "<red>■ 정지"
+        lore: [ "<gray><bold>| <reset> <gray>미리듣기를 멈춥니다" ]
+      settings:
+        name: "<gold>설정"
+        lore: [ "<gray><bold>| <reset> <gray>설정 메뉴를 엽니다" ]
+      output:
+        name: "<light_purple>음반 추출"
+        lore: [ "<gray><bold>| <reset> <gray>추출 메뉴를 엽니다", "<dark_gray><bold>| <reset> <dark_gray>가격을 확인하고 결정합니다" ]
+      copy:
+        name: "<white>복사"
+        lore:
+          - "<gray><bold>| <reset> <gray>선택한 칸을 복사합니다"
+          - "<yellow><bold>| <reset> <yellow>우클릭: 선택 전체 해제"
+          - "<dark_gray><bold>| <reset> <dark_gray>편집 칸에서 Shift+좌클릭 두 번으로 구간 선택"
+          - "<gray><bold>| <reset> <gray>선택 <selected_ticks>틱 · 대기 중 시작 <anchor_tick>"
+      paste:
+        name: "<white>붙여넣기"
+        lore:
+          - "<gray><bold>| <reset> <gray>파란 배너 자리에 붙여넣습니다"
+          - "<aqua><bold>| <reset> <aqua>붙여넣을 틱: <paste_tick>"
+          - "<dark_gray><bold>| <reset> <dark_gray>틱 배너를 클릭해 자리를 정하세요"
+
+  # =================================================================
+  # 곡 목록 (메인 GUI)
+  # =================================================================
+  song-list:
+    title: "<dark_purple>♪ 음악 스튜디오"
+    border:
+      name: "<dark_gray> "
+    # <song>, <size>=파일 크기, <notes>=노트 수(천단위 쉼표), <layers>, <length>
+    entry:
+      name: "<light_purple>♪ <song>"
+      lore:
+        - "<yellow><bold>| <reset> <yellow>좌클릭하여 열기"
+        - "<gray><bold>| <reset> <gray>"
+        - "<gray><bold>| <reset> <gray>크기: <size>"
+        - "<gray><bold>| <reset> <gray>노트: <notes>개"
+    # <page>=현재 쪽, <pages>=전체 쪽, <total>=곡 수
+    page-info:
+      name: "<gold><pages>페이지 중 <page>페이지"
+      lore:
+        - "<gray><bold>| <reset> <gray>내 곡 개수: <total>개"
+    prev-page:
+      name: "<aqua>◀ 이전 페이지"
+      lore: [ "<gray><bold>| <reset> <gray>페이지 <page> / <pages>" ]
+    next-page:
+      name: "<aqua>다음 페이지 ▶"
+      lore: [ "<gray><bold>| <reset> <gray>페이지 <page> / <pages>" ]
+
+  # =================================================================
+  # 악기 선택 메뉴
+  # =================================================================
+  instrument:
+    # <n>=레이어번호
+    title: "<dark_aqua>악기 선택 — 레이어 <n>"
+    # <instrument>
+    entry:
+      name: "<white><instrument>"
+      lore: [ "<gray><bold>| <reset> <gray>클릭하여 선택" ]
+    entry-current:
+      name: "<gold><instrument>"
+      lore: [ "<gold><bold>| <reset> <gold>적용 되어있는 악기" ]
+    # 악기 이름. 키는 Instrument enum 이름을 소문자로 적은 것이다
+    # <instrument> 자리에 글자 그대로 들어가므로 여기엔 색 태그를 쓸 수 없다
+    names:
+      # 노트블록 악기 16종
+      harp: "하프"
+      bass: "베이스"
+      basedrum: "베이스드럼"
+      snare: "스네어"
+      hat: "하이햇"
+      guitar: "기타"
+      flute: "플루트"
+      bell: "벨"
+      chime: "차임"
+      xylophone: "실로폰"
+      iron_xylophone: "철실로폰"
+      cow_bell: "카우벨"
+      didgeridoo: "디저리두"
+      bit: "비트"
+      banjo: "밴조"
+      pling: "플링"
+      # 노트블록에 머리를 얹었을 때 나는 소리
+      creeper: "크리퍼"
+      ender_dragon: "엔더 드래곤"
+      piglin: "피글린"
+      skeleton: "스켈레톤"
+      wither_skeleton: "위더 스켈레톤"
+      zombie: "좀비"
+
+  # =================================================================
+  # 설정 메뉴
+  # =================================================================
+  settings:
+    # <song>
+    title: "<gold>설정 - <song>"
+    filler:
+      name: "<dark_gray> "
+    # <song>, <tempo>, <length>, <notes>, <layers>, <cells_per_sec>
+    info:
+      name: "<light_purple>♪ <song>"
+      lore:
+        - "<gray><bold>| <reset> <gray>템포: 셀당 <tempo>틱 (<cells_per_sec> 셀/초)"
+        - "<gray><bold>| <reset> <gray>길이: <length>셀 / 노트 <notes>개"
+        - "<gray><bold>| <reset> <gray>레이어: <layers>개"
+    # <tempo>, <max>, <min>, <default>, <cells_per_sec>
+    tempo-down:
+      name: "<red>◀ 느리게"
+      lore:
+        - "<gray><bold>| <reset> <gray>셀당 틱 +1 (느려짐)"
+        - "<gray><bold>| <reset> <gray>현재: 셀당 <tempo>틱"
+        - "<gray><bold>| <reset> <gray>최대 <max>틱/셀"
+    tempo-up:
+      name: "<green>빠르게 ▶"
+      lore:
+        - "<gray><bold>| <reset> <gray>셀당 틱 -1 (빨라짐)"
+        - "<gray><bold>| <reset> <gray>현재: 셀당 <tempo>틱"
+        - "<gray><bold>| <reset> <gray>최소 <min>틱/셀"
+    tempo-reset:
+      name: "<aqua>템포 기본값"
+      lore:
+        - "<gray><bold>| <reset> <gray>셀당 <default>틱으로 되돌립니다"
+        - "<gray><bold>| <reset> <gray>현재: 셀당 <tempo>틱"
+    back:
+      name: "<yellow>← 에디터로"
+      lore:
+        - "<gray><bold>| <reset> <gray>편집 화면으로 돌아가기"
+
+  # =================================================================
+  # 음반 추출 메뉴
+  # =================================================================
+  output:
+    # <song>
+    title: "<light_purple>음반 추출 — <song>"
+    filler:
+      name: "<dark_gray> "
+    # <cost>=비용 표기(아이템 "EMERALD x5" 또는 금액), <length>, <notes>, <layers>
+    price:
+      name: "<gold>▶ <gold>가격: <cost>"
+      lore:
+        - "<gray><bold>| <reset> <gray>이 곡을 음반으로 뽑는 데 드는 비용입니다"
+        - "<gray><bold>| <reset> <gray>길이 <length>셀 · 노트 <notes>개 · 레이어 <layers>개"
+    price-free:
+      name: "<gold>▶ 가격: 무료"
+      lore:
+        - "<gray><bold>| <reset> <gray>이 서버는 추출 비용을 받지 않습니다"
+        - "<gray><bold>| <reset> <gray>길이 <length>셀 · 노트 <notes>개 · 레이어 <layers>개"
+    buy:
+      name: "<green>추출하기"
+      lore:
+        - "<gray><bold>| <reset> <gray>클릭하면 음반을 받습니다"
+        - "<gray><bold>| <reset> <gray>추출한 음반은 누구나 재생할 수 있습니다"
+    back:
+      name: "<yellow>← 에디터로"
+      lore:
+        - "<gray><bold>| <reset> <gray>추출하지 않고 돌아가기"
+
+  # =================================================================
+  # 음반 아이템
+  # =================================================================
+  disc:
+    # <song>, <layers>, <notes>, <cells>
+    name: "<light_purple>♪ <song>"
+    lore:
+      - "<dark_gray><bold>| <reset> <dark_gray>MusicStudio로 제작된 음반"
+      - "<gray><bold>| <reset> <gray>레이어 <layers> · 노트 <notes> · <cells>셀"
+      - ""
+      - "<yellow><bold>| <reset> <yellow>우클릭: 재생 / 다시 우클릭: 정지"
