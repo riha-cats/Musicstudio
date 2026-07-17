@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from gui_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 6
+config-version: 7
 
 editor:
   header:
@@ -43,7 +43,7 @@ editor:
       lore: ["<gray>Lands on the blue banner", "<aqua>Paste tick: <paste_tick>", "<dark_gray>Click a tick banner to pick the spot"]
     output:
       name: "<light_purple>Extract disc"
-      lore: ["<gray>Press this song onto a music disc"]
+      lore: ["<gray>Opens the extract menu", "<dark_gray>Check the price, then decide"]
     play:
       name: "<green>▶ Preview"
       lore: ["<gray>Only you hear it", "<gray>Press again to stop"]
@@ -73,3 +73,20 @@ settings:
   back:
     name: "<yellow>← Back to editor"
     lore: ["<gray>Return to the editor"]
+
+output:
+  title: "<light_purple>Extract disc — <song>"
+  filler:
+    name: "<dark_gray> "
+  price:
+    name: "<gold>Price: <item> x<amount>"
+    lore: ["<gray>What it costs to press this song", "<gray><length> cells · <notes> notes · <layers> layers"]
+  price-free:
+    name: "<gold>Price: free"
+    lore: ["<gray>This server charges nothing", "<gray><length> cells · <notes> notes · <layers> layers"]
+  buy:
+    name: "<green>Extract"
+    lore: ["<gray>Click to receive the disc", "<dark_gray>Anyone holding it can play it"]
+  back:
+    name: "<yellow>← Back to editor"
+    lore: ["<gray>Leave without extracting"]

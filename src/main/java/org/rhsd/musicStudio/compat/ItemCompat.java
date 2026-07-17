@@ -1,5 +1,6 @@
 package org.rhsd.musicStudio.compat;
 
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Method;
@@ -16,8 +17,32 @@ import java.lang.reflect.Method;
 public final class ItemCompat {
 
     private static final Method GLINT_OVERRIDE = resolveGlint();
+    private static final ItemFlag EXTRA_TOOLTIP = resolveExtraTooltipFlag();
 
     private ItemCompat() {
+    }
+
+    // 아이템 종류가 스스로 붙이는 부가 툴팁을 숨기는 플래그를 찾는다.
+    // 예 :: written_book 은 우리가 넣지 않아도 "원본"(generation)을 제 툴팁으로 그린다
+    // 플래그 이름이 1.20.5 에서 HIDE_POTION_EFFECTS → HIDE_ADDITIONAL_TOOLTIP 으로 갈렸다.
+    // enum 상수를 코드에 박으면 없는 쪽 버전에서 컴파일이 깨지므로 이름으로 찾는다
+    private static ItemFlag resolveExtraTooltipFlag() {
+        for (String name : new String[]{"HIDE_ADDITIONAL_TOOLTIP", "HIDE_POTION_EFFECTS"}) {
+            try {
+                return ItemFlag.valueOf(name);
+            } catch (IllegalArgumentException ignored) {
+                // 이 버전엔 없는 이름. 다음 후보로
+            }
+        }
+        return null;
+    }
+
+    // 바닐라가 자동으로 붙이는 부가 툴팁 숨기기. 미지원 버전에서는 무시된다
+    public static void hideExtraTooltip(ItemMeta meta) {
+        if (meta == null || EXTRA_TOOLTIP == null) {
+            return;
+        }
+        meta.addItemFlags(EXTRA_TOOLTIP);
     }
 
     private static Method resolveGlint() {

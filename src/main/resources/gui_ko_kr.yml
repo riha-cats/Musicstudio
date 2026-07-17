@@ -4,7 +4,7 @@
 # 인벤토리 제목, 아이템 이름, lore 를 전부 여기서 바꿀 수 있습니다
 # 기울임(italic)은 기본으로 꺼져 있고, <i>...</i> 로 감싼 부분만 기울여집니다
 # <key> 플레이스홀더는 플러그인이 채워 넣습니다. 각 항목 주석 참고
-config-version: 6
+config-version: 7
 
 # =================================================================
 # 에디터
@@ -121,7 +121,7 @@ editor:
       lore: [ "<gray>템포" ]
     output:
       name: "<light_purple>음반 추출"
-      lore: [ "<gray>이 곡을 음악 디스크로 뽑습니다" ]
+      lore: [ "<gray>추출 메뉴를 엽니다", "<dark_gray>가격을 확인하고 결정합니다" ]
     copy:
       name: "<white>복사"
       lore:
@@ -187,6 +187,35 @@ settings:
     name: "<yellow>← 에디터로"
     lore:
       - "<gray>편집 화면으로 돌아가기"
+
+# =================================================================
+# 음반 추출 메뉴
+# =================================================================
+output:
+  # <song>
+  title: "<light_purple>음반 추출 — <song>"
+  filler:
+    name: "<dark_gray> "
+  # <item>=비용 아이템, <amount>=개수, <length>, <notes>, <layers>
+  price:
+    name: "<gold>가격: <item> x<amount>"
+    lore:
+      - "<gray>이 곡을 음반으로 뽑는 데 드는 비용입니다"
+      - "<gray>길이 <length>셀 · 노트 <notes>개 · 레이어 <layers>개"
+  price-free:
+    name: "<gold>가격: 무료"
+    lore:
+      - "<gray>이 서버는 추출 비용을 받지 않습니다"
+      - "<gray>길이 <length>셀 · 노트 <notes>개 · 레이어 <layers>개"
+  buy:
+    name: "<green>추출하기"
+    lore:
+      - "<gray>클릭하면 음반을 받습니다"
+      - "<dark_gray>추출한 음반은 누구나 재생할 수 있습니다"
+  back:
+    name: "<yellow>← 에디터로"
+    lore:
+      - "<gray>추출하지 않고 돌아가기"
 
 # =================================================================
 # 음반 아이템

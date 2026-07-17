@@ -140,6 +140,10 @@ public abstract class LocalizedConfig {
                 loaded.set(path, null);
             }
         }
+        // v7 :: Output 버튼이 바로 뽑지 않고 추출 메뉴를 열게 바뀌었다
+        if (base.equals("gui") && fromVersion < 7 && toVersion >= 7) {
+            loaded.set("editor.buttons.output", null);
+        }
         if (base.equals("messages") && fromVersion < 5 && toVersion >= 5) {
             // copy-success 는 단일 틱에서 범위 복사로 뜻이 바뀌어 플레이스홀더가 통째로 교체됐다.
             // copyDefaults 는 없는 키만 채우므로, 뜻이 바뀐 키는 여기서 지워야 새 문장이 들어온다

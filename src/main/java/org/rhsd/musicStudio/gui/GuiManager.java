@@ -119,6 +119,25 @@ public final class GuiManager {
         }
     }
 
+    // 음반 추출 메뉴 클릭
+    public void handleOutputClick(Player player, OutputMenu menu, int slot) {
+        EditorSession session = sessions.get(player.getUniqueId());
+        if (session == null || !session.song().id().equals(menu.songId())) {
+            return;
+        }
+        // [1] :: 결제 칸(13~15)을 눌렀는가? 추출을 시도하고 에디터로 돌려보낸다
+        if (OutputMenu.isBuySlot(slot)) {
+            extractDisc(player, session.song());
+            reopenEditor(player, session);
+            return;
+        }
+        // [2] :: 돌아가기
+        if (slot == OutputMenu.SLOT_BACK) {
+            reopenEditor(player, session);
+        }
+        // [STOP] :: 추출 메뉴 클릭 끝
+    }
+
     // 세션 제거 + 곡 저장. 닫힘 처리와 지연 오픈 실패 경로가 함께 쓴다
     private void closeSession(UUID uuid) {
         EditorSession session = sessions.remove(uuid);
@@ -404,7 +423,8 @@ public final class GuiManager {
             case EditorRenderer.SLOT_PASTE -> doPaste(player, session);
             // 설정 / 음반 추출
             case EditorRenderer.SLOT_SETTINGS -> openLater(player, () -> SettingsMenu.build(session.song(), gui));
-            case EditorRenderer.SLOT_OUTPUT   -> extractDisc(player, session.song());
+            case EditorRenderer.SLOT_OUTPUT   ->
+                    openLater(player, () -> OutputMenu.build(session.song(), gui, discManager));
             default -> {
             }
         }

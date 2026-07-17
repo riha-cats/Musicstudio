@@ -57,6 +57,16 @@ public final class GuiListener implements Listener {
                 gui.handleSettingsClick(player, menu, event.getRawSlot());
             }
         }
+        // [D] :: 음반 추출 메뉴인가?
+        else if (holder instanceof OutputMenu menu) {
+            event.setCancelled(true);
+            if (event.getClickedInventory() != top) {
+                return;
+            }
+            if (event.getWhoClicked() instanceof Player player) {
+                gui.handleOutputClick(player, menu, event.getRawSlot());
+            }
+        }
     }
 
     @EventHandler

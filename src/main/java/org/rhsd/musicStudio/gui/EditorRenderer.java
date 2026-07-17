@@ -273,6 +273,9 @@ public final class EditorRenderer {
             if (lore != null && !lore.isEmpty()) {
                 meta.lore(lore);
             }
+            // 아이템이 스스로 붙이는 툴팁을 숨긴다 (written_book 의 "원본" 등).
+            // GUI 버튼은 우리가 쓴 이름과 lore 만 보여야 한다
+            ItemCompat.hideExtraTooltip(meta);
             it.setItemMeta(meta);
         }
         return it;
