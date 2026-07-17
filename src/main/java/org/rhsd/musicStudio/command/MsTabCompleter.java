@@ -14,17 +14,19 @@ import java.util.List;
 import java.util.Locale;
 
 // =================================================================
-// 탭 자동완성 (영문 서브커맨드)
+// 탭 자동완성 (별칭 언어에 맞춰 제안)
 // =================================================================
-// 서브커맨드는 영문으로 제안한다. 한글(생성/목록 등)도 normalizeSub 가 그대로 받으므로
-// 직접 치면 여전히 동작한다 — 제안만 영문일 뿐이다.
+// 부른 별칭이 한글(음악스튜디오/음스)이면 한국어, 영문(ms/musicstudio)이면 영문으로 제안한다.
+// 어느 쪽으로 제안하든 normalizeSub 가 한/영을 다 받으므로 반대 언어를 쳐도 동작한다.
 // 곡 이름은 본인 곡만 제안. 관리자 메뉴는 권한자에게만
 public final class MsTabCompleter implements TabCompleter {
 
-    // 탭에 제안할 서브커맨드(영문). 전부 normalizeSub 가 자기 자신으로 받는 표준형이라야 한다
-    // (CommandRoutingTest 가 검증). 한글은 제안만 안 될 뿐 쳐서 넣으면 여전히 동작한다
+    // 두 언어의 서브커맨드 제안. 순서를 맞춰 둔다(같은 인덱스가 같은 기능).
+    // 전부 normalizeSub 가 표준형으로 받는 값이라야 한다 (CommandRoutingTest 가 검증)
     static final List<String> USER_SUBS =
             List.of("create", "list", "open", "rename", "disc", "delete", "help");
+    static final List<String> USER_SUBS_KO =
+            List.of("생성", "목록", "열기", "이름변경", "음반", "삭제", "도움말");
 
     private final SongStorage storage;
 
@@ -39,11 +41,14 @@ public final class MsTabCompleter implements TabCompleter {
             return List.of();
         }
 
+        // 부른 별칭이 한글이면 한국어로, 아니면 영문으로 제안한다
+        boolean ko = isKoreanLabel(label);
+
         // [1] :: 첫 번째 인자 — 서브커맨드 목록
         if (args.length == 1) {
-            List<String> subs = new ArrayList<>(USER_SUBS);
+            List<String> subs = new ArrayList<>(ko ? USER_SUBS_KO : USER_SUBS);
             if (sender.hasPermission(MsCommand.PERM_ADMIN)) {
-                subs.add("admin");
+                subs.add(ko ? "관리자" : "admin");
             }
             return filter(subs, args[0]);
         }
@@ -55,7 +60,7 @@ public final class MsTabCompleter implements TabCompleter {
                 return filter(ownSongNames(sender), args[1]);
             }
             if (sub.equals("admin") && sender.hasPermission(MsCommand.PERM_ADMIN)) {
-                return filter(List.of("import", "reload"), args[1]);
+                return filter(ko ? List.of("임포트", "리로드") : List.of("import", "reload"), args[1]);
             }
         }
 
@@ -72,6 +77,18 @@ public final class MsTabCompleter implements TabCompleter {
             names.add(song.name());
         }
         return names;
+    }
+
+    // 부른 별칭에 한글 음절이 섞였는가. 음악스튜디오·음스 는 true, ms·musicstudio 는 false.
+    // 별칭이 늘어도(한글이면) 그대로 잡히도록 목록 대조 대신 한글 음절 범위로 본다
+    static boolean isKoreanLabel(String label) {
+        for (int i = 0; i < label.length(); i++) {
+            char c = label.charAt(i);
+            if (c >= '가' && c <= '힣') {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<String> filter(List<String> options, String prefix) {

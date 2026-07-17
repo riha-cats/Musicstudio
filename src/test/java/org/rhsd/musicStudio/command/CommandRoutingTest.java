@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // 한국어/영문 서브커맨드 정규화 검증. 순수 static 로직, Bukkit 비의존
@@ -43,14 +44,37 @@ class CommandRoutingTest {
         assertEquals("xyz", MsCommand.normalizeSub("XYZ"));
     }
 
-    // 탭에 제안하는 영문 서브커맨드는 전부 실제 처리되는 표준 서브커맨드여야 한다.
-    // normalizeSub 는 미인식 토큰을 그대로 돌려주므로 그걸로는 오타를 못 잡는다 — 표준 집합과 대조한다.
-    // 오타("creaet")나 없는 서브를 제안하면 여기서 잡힌다 (서버에서만 안 먹는 죽은 제안 방지)
+    // 탭 제안(한/영 양쪽)은 전부 실제 처리되는 표준 서브커맨드로 매핑돼야 한다.
+    // normalizeSub 로 정규화한 값이 표준 집합 안에 있는지 본다 — 오타("creaet"), 없는 서브,
+    // 잘못된 한글 별칭을 넣으면 여기서 잡힌다 (서버에서만 안 먹는 죽은 제안 방지)
     @Test
-    void everyTabSuggestionIsARealSubcommand() {
+    void everyTabSuggestionMapsToARealSubcommand() {
         Set<String> canonical = Set.of("create", "list", "open", "rename", "disc", "delete", "admin", "help");
         for (String sub : MsTabCompleter.USER_SUBS) {
-            assertTrue(canonical.contains(sub), "탭 제안이 표준 서브커맨드가 아님: " + sub);
+            assertTrue(canonical.contains(MsCommand.normalizeSub(sub)), "영문 탭 제안이 표준이 아님: " + sub);
         }
+        for (String sub : MsTabCompleter.USER_SUBS_KO) {
+            assertTrue(canonical.contains(MsCommand.normalizeSub(sub)), "한글 탭 제안이 표준이 아님: " + sub);
+        }
+    }
+
+    // 두 목록은 같은 인덱스가 같은 기능이라야 한다(한 쪽만 늘어나는 실수 방지)
+    @Test
+    void koreanAndEnglishSuggestionListsAlign() {
+        assertEquals(MsTabCompleter.USER_SUBS.size(), MsTabCompleter.USER_SUBS_KO.size());
+        for (int i = 0; i < MsTabCompleter.USER_SUBS.size(); i++) {
+            assertEquals(MsCommand.normalizeSub(MsTabCompleter.USER_SUBS.get(i)),
+                    MsCommand.normalizeSub(MsTabCompleter.USER_SUBS_KO.get(i)),
+                    "같은 인덱스인데 기능이 다름: " + i);
+        }
+    }
+
+    // 별칭이 한글이면 한국어 제안으로 가야 한다
+    @Test
+    void koreanAliasesAreDetected() {
+        assertTrue(MsTabCompleter.isKoreanLabel("음악스튜디오"));
+        assertTrue(MsTabCompleter.isKoreanLabel("음스"));
+        assertFalse(MsTabCompleter.isKoreanLabel("ms"));
+        assertFalse(MsTabCompleter.isKoreanLabel("musicstudio"));
     }
 }
