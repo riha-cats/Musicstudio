@@ -19,15 +19,16 @@ import java.util.List;
 // 곡 목록 메뉴 (54칸)
 // =================================================================
 // 레이아웃 (6행x9열) :: 바깥 테두리는 검은 판, 안쪽 4행x7열(28칸)이 곡 목록
-// 하단 테두리 가운데에 페이지 이동 :: 이전(49), 현재(50), 다음(51)
+// 하단 테두리 가운데에 페이지 이동 :: 이전(48), 현재(49), 다음(50)
+// 49 가 45~53 행의 정중앙이라 현재(시계)를 여기에 둔다
 //
 // 곡 목록은 열 때 한 번만 스냅샷해서 들고 있는다. 페이지를 넘길 때마다 저장소를
 // 다시 훑지 않기 위함이고, 곡이 지워졌을 수 있으니 클릭 시점에 id 로 다시 조회한다
 public final class SongListMenu implements MsHolder {
 
-    public static final int SLOT_PREV_PAGE = 49;
-    public static final int SLOT_PAGE_INFO = 50;
-    public static final int SLOT_NEXT_PAGE = 51;
+    public static final int SLOT_PREV_PAGE = 48;
+    public static final int SLOT_PAGE_INFO = 49;
+    public static final int SLOT_NEXT_PAGE = 50;
 
     private static final int SIZE = 54;
     private static final int ROWS = 6;

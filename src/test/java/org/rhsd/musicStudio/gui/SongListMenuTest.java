@@ -30,6 +30,14 @@ class SongListMenuTest {
         }
     }
 
+    // 시계(현재 페이지)는 하단 행 45~53 의 정중앙(49)에 와야 한다.
+    // 예전엔 50 이라 한 칸 오른쪽으로 밀려 보였다. 이전/다음은 그 좌우로 대칭
+    @Test void pageInfoIsCenteredOnTheBottomRow() {
+        assertEquals(49, SongListMenu.SLOT_PAGE_INFO, "시계가 하단 행 정중앙이 아님");
+        assertEquals(SongListMenu.SLOT_PAGE_INFO - 1, SongListMenu.SLOT_PREV_PAGE, "이전이 시계 왼쪽이 아님");
+        assertEquals(SongListMenu.SLOT_PAGE_INFO + 1, SongListMenu.SLOT_NEXT_PAGE, "다음이 시계 오른쪽이 아님");
+    }
+
     @Test void sizeFormatPicksAUnitThatIsActuallyReadable() {
         // 값이 1 이상이 되는 가장 큰 단위를 쓴다. 작은 곡이 "0.00MiB" 로 보이면 정보가 아니다
         assertEquals("0B", SongListMenu.formatSize(0));

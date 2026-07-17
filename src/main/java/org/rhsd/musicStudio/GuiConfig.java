@@ -6,7 +6,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.rhsd.musicStudio.model.Instrument;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // =================================================================
 // GUI 텍스트 (language 파일의 gui 섹션)
@@ -20,30 +23,80 @@ public final class GuiConfig {
 
     private final LanguageStore store;
 
+    // 플레이스홀더 없는 문구는 리로드 전까지 값이 같다. 렌더가 클릭마다 같은 문자열을
+    // 다시 MiniMessage 파싱하지 않도록 파싱 결과를 재사용한다 (미리듣기 중 눈금 갱신처럼
+    // 틱 루프에 얹힌 경로에서 특히 이득). 리로드로 문구가 바뀌면 세대가 올라 통째로 비운다.
+    // GUI 는 메인 스레드에서만 도므로 동기화는 필요 없다
+    private final Map<String, Component> nameCache = new HashMap<>();
+    private final Map<String, List<Component>> loreCache = new HashMap<>();
+    private int cacheGen = -1;
+
     public GuiConfig(LanguageStore store) {
         this.store = store;
+    }
+
+    // 렌더 쪽이 만들어 둔 정적 ItemStack 을 언제 버릴지 판단하는 데 쓴다
+    public int generation() {
+        return store.generation();
     }
 
     private String raw(String path) {
         return store.string(PREFIX + path, "<red>[" + path + "]");
     }
 
+    // 문구가 바뀌었으면(리로드) 캐시를 버린다. 안 그러면 옛 문구를 붙든다
+    private void ensureFresh() {
+        int gen = store.generation();
+        if (gen != cacheGen) {
+            nameCache.clear();
+            loreCache.clear();
+            cacheGen = gen;
+        }
+    }
+
     // 아이템 이름/단일 라인 (기울임 꺼짐)
     public Component name(String path, String... kv) {
-        return LanguageStore.MM.deserialize(raw(path), store.resolver(kv))
+        // 플레이스홀더가 있으면 매번 값이 달라 캐시하지 않는다
+        if (kv.length > 0) {
+            return deserializeName(path, store.resolver(kv));
+        }
+        ensureFresh();
+        Component cached = nameCache.get(path);
+        if (cached == null) {
+            cached = deserializeName(path, TagResolver.empty());
+            nameCache.put(path, cached);
+        }
+        return cached;
+    }
+
+    private Component deserializeName(String path, TagResolver resolver) {
+        return LanguageStore.MM.deserialize(raw(path), resolver)
                 .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
-    // 인벤토리 제목 (서식 그대로)
+    // 인벤토리 제목 (서식 그대로). GUI 를 열 때 한 번만 그리므로 캐시하지 않는다
     public Component title(String path, String... kv) {
         return LanguageStore.MM.deserialize(raw(path), store.resolver(kv));
     }
 
     // lore 각 줄 (기울임 꺼짐). 빈 문자열은 빈 줄로 유지
     public List<Component> lore(String path, String... kv) {
+        if (kv.length > 0) {
+            return deserializeLore(path, store.resolver(kv));
+        }
+        ensureFresh();
+        List<Component> cached = loreCache.get(path);
+        if (cached == null) {
+            // 캐시본은 밖에서 못 고치게 잠근다. meta.lore(List) 는 어차피 복사하므로 문제없다
+            cached = Collections.unmodifiableList(deserializeLore(path, TagResolver.empty()));
+            loreCache.put(path, cached);
+        }
+        return cached;
+    }
+
+    private List<Component> deserializeLore(String path, TagResolver resolver) {
         List<String> raws = store.stringList(PREFIX + path);
         List<Component> out = new ArrayList<>(raws.size());
-        TagResolver resolver = store.resolver(kv);
         for (String line : raws) {
             out.add(LanguageStore.MM.deserialize(line, resolver)
                     .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));

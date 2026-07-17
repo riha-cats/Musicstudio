@@ -12,7 +12,9 @@ import org.rhsd.musicStudio.model.Layer;
 import org.rhsd.musicStudio.model.Note;
 import org.rhsd.musicStudio.model.Song;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 
 // =================================================================
@@ -61,7 +63,24 @@ public final class EditorRenderer {
     private static final Material MAT_TICK_ANCHOR   = Material.ORANGE_BANNER;
     private static final Material MAT_TICK_PLAYING  = Material.LIME_BANNER;
 
+    // 플레이스홀더 없는 정적 아이템(컨트롤 버튼, 채움판, 레이어추가)을 한 번 만들어 재사용한다.
+    // inv.setItem 은 넘긴 ItemStack 을 NMS 로 복사하므로 같은 인스턴스를 여러 칸, 여러 플레이어에게
+    // 써도 서로 간섭하지 않는다. 리로드로 문구가 바뀌면 세대가 올라 캐시를 통째로 버린다.
+    // 그리드 셀, 헤더, 눈금, 정보는 세션 상태에 따라 매번 달라져 캐시하지 않는다
+    private static final Map<String, ItemStack> staticItems = new HashMap<>();
+    private static int staticGen = -1;
+
     private EditorRenderer() {
+    }
+
+    private static ItemStack cachedItem(GuiConfig gui, Material material, String basePath, boolean withLore) {
+        int gen = gui.generation();
+        if (gen != staticGen) {
+            staticItems.clear();
+            staticGen = gen;
+        }
+        return staticItems.computeIfAbsent(material.name() + "|" + basePath, k ->
+                item(material, gui.name(basePath + ".name"), withLore ? gui.lore(basePath + ".lore") : null));
     }
 
     public static Inventory build(EditorSession session, GuiConfig gui) {
@@ -102,13 +121,12 @@ public final class EditorRenderer {
             }
             // [B] :: 다음 레이어 자리이고 상한 미달인가? 레이어 추가 버튼
             else if (layerIdx == song.layerCount() && song.layerCount() < session.maxLayers()) {
-                inv.setItem(base, item(MAT_ADD, gui.name("editor.add-layer.name"),
-                        gui.lore("editor.add-layer.lore")));
+                inv.setItem(base, cachedItem(gui, MAT_ADD, "editor.add-layer", true));
                 fillBlocked(inv, gui, base);
             }
             // [C] :: 그 아무것도 아니라면? 채움판
             else {
-                inv.setItem(base, item(MAT_FILLER, gui.name("editor.filler.name"), null));
+                inv.setItem(base, cachedItem(gui, MAT_FILLER, "editor.filler", false));
                 fillBlocked(inv, gui, base);
             }
         }
@@ -150,7 +168,7 @@ public final class EditorRenderer {
     }
 
     private static void fillBlocked(Inventory inv, GuiConfig gui, int base) {
-        ItemStack filler = item(MAT_FILLER, gui.name("editor.filler.name"), null);
+        ItemStack filler = cachedItem(gui, MAT_FILLER, "editor.filler", false);
         for (int c = 0; c < EditorSession.VISIBLE_TICKS; c++) {
             inv.setItem(base + GRID_COL_START + c, filler);
         }
@@ -248,8 +266,9 @@ public final class EditorRenderer {
                 gui.name(base + ".name", "tick", tickStr), gui.lore(base + ".lore", "tick", tickStr));
     }
 
+    // 플레이스홀더 없는 정적 버튼. 캐시에서 꺼내 쓴다 (copy/paste 는 상태를 담아 아래 오버로드로)
     private static void button(Inventory inv, int slot, Material material, GuiConfig gui, String basePath) {
-        inv.setItem(slot, item(material, gui.name(basePath + ".name"), gui.lore(basePath + ".lore")));
+        inv.setItem(slot, cachedItem(gui, material, basePath, true));
     }
 
     private static void button(Inventory inv, int slot, Material material, GuiConfig gui,

@@ -21,9 +21,11 @@ import java.util.logging.Level;
 // =================================================================
 // 문구를 3단으로 겹쳐 읽는다 :: messages.yml(관리자) > language/<언어>.yml > language/ko_kr.yml(정본)
 //
-// language/ 는 켤 때마다 번들로 덮어쓰는 배포본이라 관리자가 고쳐도 사라진다.
-// 대신 messages.yml 은 플러그인이 절대 안 건드리고, 관리자는 바꿀 키만 적는다.
-// 이렇게 하면 새 버전의 문구가 저절로 들어오면서 관리자 수정도 안 밟는다
+// language/ 는 서버를 켤 때만 번들로 덮어쓴다(생성자). 새 버전 문구는 이때 들어온다.
+// 리로드는 덮어쓰지 않고 디스크를 그대로 다시 읽는다 — 관리자가 language/ 를 고치고
+// /ms admin reload 하면 바로 반영된다(재시작하면 다시 배포본으로 돌아간다).
+// 영구 수정은 messages.yml 에 적는다. 플러그인은 이 파일을 절대 안 건드리므로 재시작에도 남고,
+// 새 버전 문구가 저절로 들어오면서 관리자 수정도 안 밟는다
 // (EssentialsX 의 messages_custom, Towny 의 lang/override 와 같은 발상)
 //
 // 이 구조 덕에 config-version 과 키 마이그레이션이 통째로 필요 없어졌다.
@@ -40,28 +42,31 @@ public final class LanguageStore {
     private final JavaPlugin plugin;
     // 3단을 하나로 눌러 담은 결과. 조회는 여기서만 한다
     private YamlConfiguration merged = new YamlConfiguration();
+    // 리로드 때마다 오른다. merged 가 바뀌었는지 얇은 껍데기(GuiConfig)가 이 값으로 판별해
+    // 파싱해 둔 Component 캐시를 버린다. 안 오르면 캐시가 옛 문구를 붙들어 리로드가 안 먹는다
+    private int generation = 0;
 
     public LanguageStore(JavaPlugin plugin) {
         this.plugin = plugin;
+        // [0] :: 서버를 켤 때만 한다 — 옛 구조 파일 정리 + 배포본 덮어쓰기.
+        // 리로드로는 안 밟으므로 language/ 를 고쳐 리로드하면 반영된다
+        relocateLegacyFiles();
+        exportBundledLanguages();
         reload();
     }
 
+    // 디스크의 language/ 와 messages.yml 을 다시 읽어 3단으로 눌러 담는다.
+    // 배포본을 덮어쓰지 않으므로 관리자의 language/ 수정도 이 자리에서 반영된다
     public void reload() {
-        // [0] :: 옛 구조(messages_ko_kr.yml 등)를 쓰던 서버라면 먼저 치운다
-        relocateLegacyFiles();
-
-        // [1] :: 배포본을 번들로 덮어쓴다. 여기가 "고치면 사라지는" 자리다
-        exportBundledLanguages();
-
         String locale = plugin.getConfig().getString("language", CANONICAL).toLowerCase(Locale.ROOT);
 
-        // [2] :: 정본을 깔고 그 위에 현재 언어를 덮는다. 번역이 빠진 키는 정본이 메운다
+        // [1] :: 정본을 깔고 그 위에 현재 언어를 덮는다. 번역이 빠진 키는 정본이 메운다
         YamlConfiguration result = readLanguage(CANONICAL);
         if (!locale.equals(CANONICAL)) {
             overlay(result, readLanguage(locale));
         }
 
-        // [3] :: 마지막으로 관리자 override. 이게 가장 세다
+        // [2] :: 마지막으로 관리자 override. 이게 가장 세다
         File override = new File(plugin.getDataFolder(), OVERRIDE_FILE);
         if (override.exists()) {
             overlay(result, YamlConfiguration.loadConfiguration(override));
@@ -70,10 +75,16 @@ public final class LanguageStore {
         }
 
         merged = result;
+        generation++;
         // [STOP] :: 로드 끝
     }
 
-    // 번들 language/*.yml 을 디스크로 꺼낸다. 매번 덮어써야 새 문구가 들어온다
+    // 리로드 세대. 캐시를 든 쪽이 이 값의 변화를 보고 스스로 비운다
+    public int generation() {
+        return generation;
+    }
+
+    // 번들 language/*.yml 을 디스크로 꺼낸다. 서버 시작 때 덮어써 새 버전 문구를 들인다
     private void exportBundledLanguages() {
         for (String locale : new String[]{CANONICAL, "en_us"}) {
             String path = LANG_DIR + "/" + locale + ".yml";
