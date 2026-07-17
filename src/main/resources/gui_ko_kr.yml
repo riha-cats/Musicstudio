@@ -4,7 +4,7 @@
 # 인벤토리 제목, 아이템 이름, lore 를 전부 여기서 바꿀 수 있습니다
 # 기울임(italic)은 기본으로 꺼져 있고, <i>...</i> 로 감싼 부분만 기울여집니다
 # <key> 플레이스홀더는 플러그인이 채워 넣습니다. 각 항목 주석 참고
-config-version: 7
+config-version: 8
 
 # =================================================================
 # 에디터
@@ -135,6 +135,33 @@ editor:
         - "<gray>파란 배너 자리에 붙여넣습니다"
         - "<aqua>붙여넣을 틱: <paste_tick>"
         - "<dark_gray>틱 배너를 클릭해 자리를 정하세요"
+
+# =================================================================
+# 곡 목록 (메인 GUI)
+# =================================================================
+song-list:
+  title: "<dark_purple>♪ 음악 스튜디오"
+  border:
+    name: "<dark_gray> "
+  # <song>, <size>=파일 크기, <notes>=노트 수(천단위 쉼표), <layers>, <length>
+  entry:
+    name: "<light_purple><bold>♪ <song>"
+    lore:
+      - "<yellow>▌ 좌클릭하여 열기"
+      - "<gray>▌"
+      - "<gray>▌ 크기: <size>"
+      - "<gray>▌ 노트: <notes>개"
+  # <page>=현재 쪽, <pages>=전체 쪽, <total>=곡 수
+  page-info:
+    name: "<aqua>페이지 <page> / <pages>"
+    lore:
+      - "<gray>곡 <total>개"
+  prev-page:
+    name: "<aqua>◀ 이전 페이지"
+    lore: [ "<gray>페이지 <page> / <pages>" ]
+  next-page:
+    name: "<aqua>다음 페이지 ▶"
+    lore: [ "<gray>페이지 <page> / <pages>" ]
 
 # =================================================================
 # 악기 선택 메뉴

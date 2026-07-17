@@ -35,6 +35,11 @@ public final class SongStorage {
     private final Map<String, Song> byId = new ConcurrentHashMap<>();
     // 소유자 스코프 이름 색인 :: "<owner> <소문자이름>" -> id. 사람마다 같은 이름 곡을 가질 수 있다
     private final Map<String, String> nameIndex = new ConcurrentHashMap<>();
+    // 곡 id → 파일 바이트 수. 목록 GUI 표시용이다.
+    // 파일을 이미 만지는 지점(로드+저장)에서만 갱신해서, GUI 를 열 때 디스크를 건드리지 않는다
+    // (28칸 목록을 페이지마다 stat 하면 메인 스레드에서 I/O 가 반복된다)
+    // 비동기 저장 스레드도 쓰므로 ConcurrentHashMap
+    private final Map<String, Long> fileSizes = new ConcurrentHashMap<>();
 
     public SongStorage(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -48,6 +53,7 @@ public final class SongStorage {
     public void loadAll() {
         byId.clear();
         nameIndex.clear();
+        fileSizes.clear();
         File[] files = songsDir.listFiles((dir, n) -> n.endsWith(".yml"));
         if (files == null) {
             return;
@@ -57,6 +63,8 @@ public final class SongStorage {
             Song song = read(file);
             if (song != null) {
                 index(song);
+                // 이미 연 파일이라 stat 이 사실상 공짜다
+                fileSizes.put(song.id(), file.length());
                 loaded++;
             }
         }
@@ -131,6 +139,13 @@ public final class SongStorage {
         return null;
     }
 
+    // 곡 파일의 바이트 수. 아직 한 번도 저장 안 됐다면? 0
+    // 디스크를 안 보고 캐시만 읽는다 — GUI 렌더 중에 불러도 안전하다
+    public long fileSize(String songId) {
+        Long size = fileSizes.get(songId);
+        return size == null ? 0L : size;
+    }
+
     public List<Song> all() {
         return new ArrayList<>(byId.values());
     }
@@ -170,6 +185,7 @@ public final class SongStorage {
         }
         byId.remove(song.id());
         nameIndex.remove(nameKey(song.owner(), song.name()));
+        fileSizes.remove(song.id());
         return true;
     }
 
@@ -236,12 +252,17 @@ public final class SongStorage {
         try {
             tmp = File.createTempFile(id + "-", ".tmp", songsDir);
             config.save(tmp);
+            // 크기는 move 전 tmp 에서 잰다. 어차피 방금 쓴 파일이라 stat 이 공짜고,
+            // 목록 GUI 가 이 값을 메모리에서 읽어 파일을 다시 안 건드린다
+            long written = tmp.length();
             try {
                 Files.move(tmp.toPath(), file.toPath(),
                         StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (AtomicMoveNotSupportedException notAtomic) {
                 Files.move(tmp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
+            // 옮기기가 끝난 뒤에 기록한다 — 실패하면 옛 크기가 남아야 맞다
+            fileSizes.put(id, written);
         } catch (IOException ex) {
             plugin.getLogger().log(Level.SEVERE, "곡 저장 실패: " + name, ex);
             if (tmp != null) {

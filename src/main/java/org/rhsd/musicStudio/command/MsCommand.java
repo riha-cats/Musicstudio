@@ -180,9 +180,9 @@ public final class MsCommand implements CommandExecutor {
             msg.send(sender, "player-only");
             return;
         }
-        // [2] :: 이름 arguments 가 설정되어 있는가?
+        // [2] :: 이름 없이 그냥 "열기" 인가? 곡 목록 GUI 를 띄운다
         if (args.length < 2) {
-            msg.send(sender, "command.open-usage");
+            gui.openSongList(player);
             return;
         }
         // [3] :: 곡이 존재하는가?

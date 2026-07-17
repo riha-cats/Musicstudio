@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from gui_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 7
+config-version: 8
 
 editor:
   header:
@@ -90,3 +90,20 @@ output:
   back:
     name: "<yellow>← Back to editor"
     lore: ["<gray>Leave without extracting"]
+
+song-list:
+  title: "<dark_purple>♪ Music Studio"
+  border:
+    name: "<dark_gray> "
+  entry:
+    name: "<light_purple><bold>♪ <song>"
+    lore: ["<yellow>▌ Left click to open", "<gray>▌", "<gray>▌ Size: <size>", "<gray>▌ Notes: <notes>"]
+  page-info:
+    name: "<aqua>Page <page> / <pages>"
+    lore: ["<gray><total> songs"]
+  prev-page:
+    name: "<aqua>◀ Previous page"
+    lore: ["<gray>Page <page> / <pages>"]
+  next-page:
+    name: "<aqua>Next page ▶"
+    lore: ["<gray>Page <page> / <pages>"]

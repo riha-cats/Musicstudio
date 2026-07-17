@@ -20,6 +20,7 @@ import org.rhsd.musicStudio.storage.SongStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.NavigableSet;
@@ -76,7 +77,8 @@ public final class GuiManager {
     // 열기 / 닫기
     // =================================================================
 
-    public void openEditor(Player player, Song song) {
+    // 세션 준비. 명령으로 열든 목록에서 열든 이 앞단은 같아야 한다
+    private EditorSession prepareSession(Player player, Song song) {
         // [0] :: 다른 곡을 편집 중이었다면? 이전 곡 저장
         EditorSession old = sessions.get(player.getUniqueId());
         if (old != null && !old.song().id().equals(song.id())) {
@@ -85,6 +87,13 @@ public final class GuiManager {
         stopPreview(player);
         EditorSession session = new EditorSession(player.getUniqueId(), song, maxLayers());
         sessions.put(player.getUniqueId(), session);
+        return session;
+    }
+
+    // 명령으로 여는 경로.
+    // 지연 없음. 아마도? 이론상은 없음 ㅎ :P
+    public void openEditor(Player player, Song song) {
+        EditorSession session = prepareSession(player, song);
         player.openInventory(EditorRenderer.build(session, gui));
     }
 
@@ -117,6 +126,42 @@ public final class GuiManager {
         if (pending != null) {
             pending.cancel();
         }
+    }
+
+    // 곡 목록 GUI 열기. 본인 곡만 보이고, 관리자는 전체를 본다
+    public void openSongList(Player player) {
+        List<Song> songs = player.hasPermission(MsCommand.PERM_ADMIN)
+                ? storage.all() : storage.getByOwner(player.getUniqueId());
+        // 이름순 고정. 안 그러면 열 때마다 순서가 바뀌어 같은 자리를 두 번 못 누른다
+        songs.sort(Comparator.comparing(Song::name, String.CASE_INSENSITIVE_ORDER));
+        player.openInventory(SongListMenu.build(songs, gui, storage));
+    }
+
+    // 곡 목록 메뉴 클릭
+    public void handleSongListClick(Player player, SongListMenu menu, int slot) {
+        // [1] :: 페이지 이동인가? 인벤토리를 다시 열지 않고 내용만 갈아끼운다
+        if (slot == SongListMenu.SLOT_PREV_PAGE || slot == SongListMenu.SLOT_NEXT_PAGE) {
+            int delta = slot == SongListMenu.SLOT_PREV_PAGE ? -1 : 1;
+            if (menu.movePage(delta)) {
+                SongListMenu.render(menu.getInventory(), menu, gui, storage);
+            }
+            return;
+        }
+        // [2] :: 곡 칸인가? 빈 칸이면 null 이 온다
+        String songId = menu.songIdAt(slot);
+        if (songId == null) {
+            return;
+        }
+        // [3] :: 목록을 띄운 뒤에 지워졌을 수 있으니 id 로 다시 조회한다
+        Song song = storage.getById(songId);
+        if (song == null) {
+            msg.send(player, "command.song-not-found", "name", "-");
+            SongListMenu.render(menu.getInventory(), menu, gui, storage);
+            return;
+        }
+        EditorSession session = prepareSession(player, song);
+        openLater(player, () -> EditorRenderer.build(session, gui));
+        // [STOP] :: 목록 클릭 끝
     }
 
     // 음반 추출 메뉴 클릭
