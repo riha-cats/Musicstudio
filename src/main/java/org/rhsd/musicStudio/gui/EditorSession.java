@@ -92,10 +92,28 @@ public final class EditorSession {
             selectedLayer = Song.remapLayerIndex(selectedLayer, from, to);
             if (selectedTick == null || song.getNote(selectedTick, selectedLayer) == null) clearSelection();
         }
+        // 범위 선택은 인덱스가 아니라 레이어를 따라간다. 옛 인덱스에 남겨두면
+        // 그 자리를 채운 남의 레이어를 가리킨 채 복사 대상이 되어버린다
+        TreeSet<SelectedCell> movedCells = new TreeSet<>();
+        for (SelectedCell cell : selectedCells) {
+            movedCells.add(new SelectedCell(cell.tick(), Song.remapLayerIndex(cell.layer(), from, to)));
+        }
+        selectedCells.clear();
+        selectedCells.addAll(movedCells);
+        if (rangeAnchorLayer != null) {
+            rangeAnchorLayer = Song.remapLayerIndex(rangeAnchorLayer, from, to);
+        }
         for (int i = 0; i < clipboardNotes.size(); i++) {
             ClipboardNote note = clipboardNotes.get(i);
             clipboardNotes.set(i, new ClipboardNote(note.relativeTick(),
                     Song.remapLayerIndex(note.layer(), from, to), note.key()));
+        }
+        // 붙여넣기 후 선택을 복원하는 셀도 같은 레이어를 따라가야 한다. 상대 틱은 그대로라
+        // 오프셋은 건드릴 필요가 없다
+        for (int i = 0; i < clipboardCells.size(); i++) {
+            ClipboardCell cell = clipboardCells.get(i);
+            clipboardCells.set(i, new ClipboardCell(cell.relativeTick(),
+                    Song.remapLayerIndex(cell.layer(), from, to)));
         }
     }
 
@@ -110,12 +128,18 @@ public final class EditorSession {
         }
         TreeSet<SelectedCell> adjustedCells = new TreeSet<>();
         for (SelectedCell cell : selectedCells) {
+            // [1] :: 삭제된 레이어의 셀인가? 가리킬 대상이 사라졌으니 선택에서 버린다
+            if (cell.layer() == deletedLayer) continue;
             adjustedCells.add(new SelectedCell(cell.tick(),
                     cell.layer() > deletedLayer ? cell.layer() - 1 : cell.layer()));
         }
         selectedCells.clear();
         selectedCells.addAll(adjustedCells);
-        if (rangeAnchorLayer != null && rangeAnchorLayer > deletedLayer) rangeAnchorLayer--;
+        // [2] :: 시작점이 삭제된 레이어에 있었다면? 취소. 위쪽이었다면 인덱스만 당긴다
+        if (rangeAnchorLayer != null) {
+            if (rangeAnchorLayer == deletedLayer) clearRangeAnchor();
+            else if (rangeAnchorLayer > deletedLayer) rangeAnchorLayer--;
+        }
         List<ClipboardNote> adjusted = new ArrayList<>();
         for (ClipboardNote note : clipboardNotes) {
             if (note.layer() == deletedLayer) continue;
@@ -124,6 +148,17 @@ public final class EditorSession {
         }
         clipboardNotes.clear();
         clipboardNotes.addAll(adjusted);
+        // [3] :: 셀도 노트와 같은 기준으로 정리한다. 셀만 남기면 붙여넣기 후 복원되는
+        //        선택이 사라진 레이어를 가리킨다. 셀이 빠지면 오프셋도 다시 태운다
+        List<ClipboardCell> adjustedClipCells = new ArrayList<>();
+        for (ClipboardCell cell : clipboardCells) {
+            if (cell.layer() == deletedLayer) continue;
+            adjustedClipCells.add(new ClipboardCell(cell.relativeTick(),
+                    cell.layer() > deletedLayer ? cell.layer() - 1 : cell.layer()));
+        }
+        clipboardCells.clear();
+        clipboardCells.addAll(adjustedClipCells);
+        rebuildClipboardTickOffsets();
     }
 
     public void onLayerDeleted(int deletedLayer) { remapAfterLayerDeletion(deletedLayer); }
@@ -179,8 +214,13 @@ public final class EditorSession {
         clipboardNotes.addAll(notes);
         clipboardCells.clear();
         clipboardCells.addAll(cells);
+        rebuildClipboardTickOffsets();
+    }
+
+    // 틱 오프셋은 셀에서 파생된다. 셀이 바뀌면 반드시 여기를 다시 태워야 어긋나지 않는다
+    private void rebuildClipboardTickOffsets() {
         clipboardTickOffsets.clear();
-        for (ClipboardCell cell : cells) clipboardTickOffsets.add(cell.relativeTick());
+        for (ClipboardCell cell : clipboardCells) clipboardTickOffsets.add(cell.relativeTick());
     }
 
 

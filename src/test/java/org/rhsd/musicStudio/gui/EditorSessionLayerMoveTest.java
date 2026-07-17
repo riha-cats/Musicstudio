@@ -11,7 +11,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EditorSessionLayerMoveTest {
-    @Test void remapsSingleSelectionAndClipboardButPreservesTickRangeState() {
+    @Test void remapsSingleSelectionClipboardAndTickRangeAfterLayerMove() {
         Song song = new Song("id", "test", UUID.randomUUID());
         for (int i = 1; i < 4; i++) song.addLayer(new Layer(Instrument.HARP, "L" + i));
         song.setNote(20, 1, 12);
@@ -27,10 +27,48 @@ class EditorSessionLayerMoveTest {
         assertEquals(3, session.selectedLayer());
         assertEquals(20, session.selectedTick());
         assertEquals(new EditorSession.ClipboardNote(2, 3, 9), session.clipboardNotes().getFirst());
+        assertEquals(new EditorSession.ClipboardCell(2, 3), session.clipboardCells().getFirst());
         assertEquals(2, session.clipboardTickOffsets().getFirst());
+        // 옛 레이어 2 는 이동 후 인덱스 1 로 내려간다. 범위 선택과 시작점도 같이 따라와야 한다
         assertEquals(7, session.rangeAnchorTick());
-        assertEquals(2, session.rangeAnchorLayer());
-        assertTrue(session.isCellSelected(8, 2));
+        assertEquals(1, session.rangeAnchorLayer());
+        assertTrue(session.isCellSelected(8, 1));
+        assertFalse(session.isCellSelected(8, 2));
+    }
+
+    @Test void deletionDropsSelectedCellsOnDeletedLayer() {
+        Song song = new Song("id", "test", UUID.randomUUID());
+        song.addLayer(new Layer(Instrument.HARP, "B"));
+        song.addLayer(new Layer(Instrument.HARP, "C"));
+        EditorSession session = new EditorSession(UUID.randomUUID(), song, 9);
+        session.toggleTickRange(1, 4, 6);
+        session.remapAfterLayerDeletion(1);
+        assertTrue(session.selectedCells().isEmpty());
+    }
+
+    @Test void deletionDropsClipboardCellsOnDeletedLayerAndRebuildsTickOffsets() {
+        Song song = new Song("id", "test", UUID.randomUUID());
+        song.addLayer(new Layer(Instrument.HARP, "B"));
+        song.addLayer(new Layer(Instrument.HARP, "C"));
+        EditorSession session = new EditorSession(UUID.randomUUID(), song, 9);
+        session.setClipboard(List.of(new EditorSession.ClipboardNote(3, 2, 5)),
+                List.of(new EditorSession.ClipboardCell(1, 1), new EditorSession.ClipboardCell(3, 2)));
+        assertEquals(List.of(1, 3), List.copyOf(session.clipboardTickOffsets()));
+
+        session.remapAfterLayerDeletion(1);
+        // 레이어1 셀은 버리고 레이어2 셀은 1 로 당긴다. 오프셋 1 은 근거가 사라졌으니 같이 빠진다
+        assertEquals(List.of(new EditorSession.ClipboardCell(3, 1)), session.clipboardCells());
+        assertEquals(List.of(3), List.copyOf(session.clipboardTickOffsets()));
+    }
+
+    @Test void deletionClearsRangeAnchorOnDeletedLayer() {
+        Song song = new Song("id", "test", UUID.randomUUID());
+        song.addLayer(new Layer(Instrument.HARP, "B"));
+        song.addLayer(new Layer(Instrument.HARP, "C"));
+        EditorSession session = new EditorSession(UUID.randomUUID(), song, 9);
+        session.setRangeAnchor(10, 1);
+        session.remapAfterLayerDeletion(1);
+        assertFalse(session.hasRangeAnchor());
     }
 
     @Test void pendingSourcePersistsAcrossScrollAndDeletionIsCorrected() {
