@@ -14,13 +14,17 @@ import java.util.List;
 import java.util.Locale;
 
 // =================================================================
-// 탭 자동완성 (한국어 우선)
+// 탭 자동완성 (영문 서브커맨드)
 // =================================================================
+// 서브커맨드는 영문으로 제안한다. 한글(생성/목록 등)도 normalizeSub 가 그대로 받으므로
+// 직접 치면 여전히 동작한다 — 제안만 영문일 뿐이다.
 // 곡 이름은 본인 곡만 제안. 관리자 메뉴는 권한자에게만
 public final class MsTabCompleter implements TabCompleter {
 
-    private static final List<String> USER_SUBS =
-            List.of("생성", "목록", "열기", "이름변경", "음반", "삭제", "도움말");
+    // 탭에 제안할 서브커맨드(영문). 전부 normalizeSub 가 자기 자신으로 받는 표준형이라야 한다
+    // (CommandRoutingTest 가 검증). 한글은 제안만 안 될 뿐 쳐서 넣으면 여전히 동작한다
+    static final List<String> USER_SUBS =
+            List.of("create", "list", "open", "rename", "disc", "delete", "help");
 
     private final SongStorage storage;
 
@@ -39,7 +43,7 @@ public final class MsTabCompleter implements TabCompleter {
         if (args.length == 1) {
             List<String> subs = new ArrayList<>(USER_SUBS);
             if (sender.hasPermission(MsCommand.PERM_ADMIN)) {
-                subs.add("관리자");
+                subs.add("admin");
             }
             return filter(subs, args[0]);
         }
@@ -51,7 +55,7 @@ public final class MsTabCompleter implements TabCompleter {
                 return filter(ownSongNames(sender), args[1]);
             }
             if (sub.equals("admin") && sender.hasPermission(MsCommand.PERM_ADMIN)) {
-                return filter(List.of("임포트", "리로드"), args[1]);
+                return filter(List.of("import", "reload"), args[1]);
             }
         }
 
