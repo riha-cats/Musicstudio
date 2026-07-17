@@ -124,6 +124,13 @@ public abstract class LocalizedConfig {
                 loaded.set(path, null);
             }
         }
+        // v5 :: 붙여넣기가 "선택 구간의 첫 틱"에서 "배너로 찍은 자리"로 바뀌었다.
+        // 눈금과 붙여넣기 버튼 문구가 그에 맞춰 통째로 갈렸다
+        if (base.equals("gui") && fromVersion < 5 && toVersion >= 5) {
+            for (String path : List.of("editor.ruler", "editor.buttons.paste")) {
+                loaded.set(path, null);
+            }
+        }
         if (base.equals("messages") && fromVersion < 5 && toVersion >= 5) {
             // copy-success 는 단일 틱에서 범위 복사로 뜻이 바뀌어 플레이스홀더가 통째로 교체됐다.
             // copyDefaults 는 없는 키만 채우므로, 뜻이 바뀐 키는 여기서 지워야 새 문장이 들어온다

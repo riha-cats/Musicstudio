@@ -140,7 +140,15 @@ public final class GuiManager {
                     rerender(player, session);
                 }
             }
-            // [2] :: 틱 배너는 선택 상태를 읽어주기만 한다. 선택은 셀에서 Shift+좌클릭으로 한다
+            // [2] :: 틱 배너를 클릭했다면? 붙여넣을 위치 지정 (같은 곳 재클릭 시 해제)
+            else if (col >= EditorRenderer.GRID_COL_START) {
+                int tick = session.tickOffset() + col - EditorRenderer.GRID_COL_START;
+                session.togglePasteTick(tick);
+                msg.send(player, session.hasPasteTick()
+                                ? "editor.paste-target-set" : "editor.paste-target-cleared",
+                        "tick", String.valueOf(tick));
+                rerenderRuler(player, session);
+            }
             return;
         }
 
@@ -287,13 +295,6 @@ public final class GuiManager {
         }
     }
 
-    // 붙여넣기 기준 틱 :: 선택 구간의 첫 틱. 선택이 없다면? 화면 맨 왼쪽 틱으로 떨어진다
-    // (한 칸만 Shift+좌클릭하면 그게 곧 붙여넣을 자리가 된다 — 커서 개념을 따로 두지 않는 이유)
-    private int pasteBaseTick(EditorSession session) {
-        NavigableSet<Integer> selected = session.selectedTicks();
-        return selected.isEmpty() ? session.tickOffset() : selected.first();
-    }
-
     // 음반 추출. 컨트롤 바의 Output 버튼과 설정 메뉴가 함께 쓴다
     private void extractDisc(Player player, Song song) {
         // [1] :: 빈 곡인가?
@@ -354,7 +355,7 @@ public final class GuiManager {
                 if (click.isRightClick()) clearTickRange(player, session);
                 else doCopy(player, session);
             }
-            case EditorRenderer.SLOT_PASTE -> doPaste(player, session, pasteBaseTick(session));
+            case EditorRenderer.SLOT_PASTE -> doPaste(player, session);
             // 설정 / 음반 추출
             case EditorRenderer.SLOT_SETTINGS -> player.openInventory(SettingsMenu.build(session.song(), gui));
             case EditorRenderer.SLOT_OUTPUT   -> extractDisc(player, session.song());
@@ -423,11 +424,19 @@ public final class GuiManager {
                 "to", String.valueOf(last));
     }
 
-    private void doPaste(Player player, EditorSession session, int base) {
+    private void doPaste(Player player, EditorSession session) {
+        // [1] :: 복사한 게 없는가?
         if (!session.hasClipboard()) {
             msg.send(player, "editor.paste-empty");
             return;
         }
+        // [2] :: 붙여넣을 자리를 안 정했는가? 폴백으로 몰래 아무 데나 붙이지 않고 되묻는다
+        //        ("붙여넣기는 파란 배너에 붙는다"는 규칙에 예외를 두지 않기 위함)
+        if (!session.hasPasteTick()) {
+            msg.send(player, "editor.paste-no-target");
+            return;
+        }
+        int base = session.pasteTick();
         int max = maxTicks();
         List<EditorSession.PasteNote> placements = EditorSession.resolvePaste(
                 session.clipboardNotes(), base, max, session.song().layerCount());

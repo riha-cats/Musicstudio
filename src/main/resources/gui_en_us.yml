@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from gui_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 4
+config-version: 5
 
 editor:
   header:
@@ -24,7 +24,10 @@ editor:
     lore: ["<gray>Tempo: <tempo> ticks/cell", "<gray>Length: <length> cells / <notes> notes", "<gray>Layers: <layers> / <max_layers>", "<aqua>New note: <key_name>", "<aqua>Selected ticks: <selected_ticks> · Range start: <anchor_tick>"]
   ruler:
     name: "<white>Tick <tick>"
-    lore: ["<gray>Not selected", "<dark_gray>Shift+left click an editor cell to select"]
+    lore: ["<gray>Click: paste here (turns blue)", "<dark_gray>Shift+left click editor cells to select"]
+  ruler-paste:
+    name: "<aqua>▼ Tick <tick> (paste here)"
+    lore: ["<gray>The Paste button lands here", "<dark_gray>Click again to clear"]
   ruler-selected:
     name: "<yellow>■ Tick <tick> (selected)"
     lore: ["<gray>Copy will take this tick", "<dark_gray>Right click Copy to clear all"]
@@ -37,7 +40,7 @@ editor:
       lore: ["<gray>Copies the selected cells", "<gray>Right click: clear the whole selection", "<dark_gray>Shift+left click twice on cells to pick a range", "<gray><selected_ticks> ticks selected · pending start <anchor_tick>"]
     paste:
       name: "<white>Paste"
-      lore: ["<gray>Pastes at the first selected tick", "<gray>With no selection, the leftmost visible tick", "<dark_gray>Select a single cell to paste exactly there", "<gray><selected_ticks> ticks selected · pending start <anchor_tick>"]
+      lore: ["<gray>Lands on the blue banner", "<aqua>Paste tick: <paste_tick>", "<dark_gray>Click a tick banner to pick the spot"]
     output:
       name: "<light_purple>Extract disc"
       lore: ["<gray>Press this song onto a music disc"]

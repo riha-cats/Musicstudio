@@ -4,7 +4,7 @@
 # 인벤토리 제목, 아이템 이름, lore 를 전부 여기서 바꿀 수 있습니다
 # 기울임(italic)은 기본으로 꺼져 있고, <i>...</i> 로 감싼 부분만 기울여집니다
 # <key> 플레이스홀더는 플러그인이 채워 넣습니다. 각 항목 주석 참고
-config-version: 4
+config-version: 5
 
 # =================================================================
 # 에디터
@@ -76,13 +76,18 @@ editor:
   ruler:
     name: "<white>틱 <tick>"
     lore:
-      - "<gray>선택되지 않은 틱"
-      - "<dark_gray>편집 칸에서 Shift+좌클릭으로 선택"
+      - "<gray>클릭: 여기에 붙여넣기 (파란색으로 표시)"
+      - "<dark_gray>선택은 편집 칸에서 Shift+좌클릭"
   ruler-selected:
     name: "<yellow>■ 틱 <tick> (선택됨)"
     lore:
       - "<gray>복사 버튼이 이 틱을 가져갑니다"
       - "<dark_gray>복사 버튼 우클릭으로 전체 해제"
+  ruler-paste:
+    name: "<aqua>▼ 틱 <tick> (여기에 붙여넣기)"
+    lore:
+      - "<gray>붙여넣기 버튼이 이 자리에 붙입니다"
+      - "<dark_gray>다시 클릭하면 해제"
   ruler-playing:
     name: "<green>▶ 틱 <tick>"
   ruler-anchor:
@@ -127,10 +132,9 @@ editor:
     paste:
       name: "<white>붙여넣기"
       lore:
-        - "<gray>선택 구간의 첫 틱에 붙여넣습니다"
-        - "<gray>선택이 없으면 화면 맨 왼쪽 틱"
-        - "<dark_gray>한 칸만 선택하면 그 자리에 붙습니다"
-        - "<gray>선택 <selected_ticks>틱 · 대기 중 시작 <anchor_tick>"
+        - "<gray>파란 배너 자리에 붙여넣습니다"
+        - "<aqua>붙여넣을 틱: <paste_tick>"
+        - "<dark_gray>틱 배너를 클릭해 자리를 정하세요"
 
 # =================================================================
 # 악기 선택 메뉴

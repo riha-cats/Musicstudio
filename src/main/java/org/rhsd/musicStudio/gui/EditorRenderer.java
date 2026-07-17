@@ -53,9 +53,11 @@ public final class EditorRenderer {
     private static final Material MAT_ADD          = Material.LIME_STAINED_GLASS_PANE;
     private static final Material MAT_FILLER       = Material.BLACK_STAINED_GLASS_PANE;
     private static final Material MAT_INFO         = Material.JUKEBOX;
-    // 틱 눈금 배너 4색 :: 흰=미선택, 노랑=선택됨, 주황=대기 중 시작점, 연두=재생 헤드
+    // 틱 눈금 배너 5색 :: 흰=미선택, 노랑=선택됨(복사 대상), 파랑=붙여넣을 자리,
+    //                     주황=대기 중 시작점, 연두=재생 헤드
     private static final Material MAT_TICK          = Material.WHITE_BANNER;
     private static final Material MAT_TICK_SELECTED = Material.YELLOW_BANNER;
+    private static final Material MAT_TICK_PASTE    = Material.LIGHT_BLUE_BANNER;
     private static final Material MAT_TICK_ANCHOR   = Material.ORANGE_BANNER;
     private static final Material MAT_TICK_PLAYING  = Material.LIME_BANNER;
 
@@ -142,7 +144,8 @@ public final class EditorRenderer {
             int tick = tickOffset + c;
             inv.setItem(RULER_ROW * 9 + GRID_COL_START + c,
                     rulerItem(gui, tick, session.playingTick() == tick,
-                            hasAnchor && anchorTick == tick, selected.contains(tick)));
+                            hasAnchor && anchorTick == tick,
+                            session.pasteTick() == tick, selected.contains(tick)));
         }
     }
 
@@ -220,8 +223,10 @@ public final class EditorRenderer {
         return item(MAT_INFO, gui.name("editor.info.name", ph), gui.lore("editor.info.lore", ph));
     }
 
-    // 우선순위 :: 재생 헤드 > 대기 중 시작점 > 선택됨 > 미선택
-    private static ItemStack rulerItem(GuiConfig gui, int tick, boolean playing, boolean anchor, boolean selected) {
+    // 우선순위 :: 재생 헤드 > 대기 중 시작점 > 붙여넣을 자리 > 선택됨 > 미선택
+    // (붙여넣을 자리가 선택보다 위다. 선택된 틱에 커서를 놓아도 커서가 보여야 하기 때문)
+    private static ItemStack rulerItem(GuiConfig gui, int tick, boolean playing, boolean anchor,
+                                       boolean pasteTarget, boolean selected) {
         String tickStr = String.valueOf(tick);
         if (playing) {
             return item(MAT_TICK_PLAYING, gui.name("editor.ruler-playing.name", "tick", tickStr), null);
@@ -232,6 +237,11 @@ public final class EditorRenderer {
                     gui.lore("editor.ruler-anchor.lore", "tick", tickStr));
             setGlint(it);
             return it;
+        }
+        // [2] :: 붙여넣기 버튼이 겨냥하는 자리인가?
+        if (pasteTarget) {
+            return item(MAT_TICK_PASTE, gui.name("editor.ruler-paste.name", "tick", tickStr),
+                    gui.lore("editor.ruler-paste.lore", "tick", tickStr));
         }
         String base = selected ? "editor.ruler-selected" : "editor.ruler";
         return item(selected ? MAT_TICK_SELECTED : MAT_TICK,
@@ -245,7 +255,8 @@ public final class EditorRenderer {
     private static void button(Inventory inv, int slot, Material material, GuiConfig gui,
                                String basePath, EditorSession session) {
         String[] ph = {"selected_ticks", String.valueOf(session.selectedTicks().size()),
-                "anchor_tick", session.hasRangeAnchor() ? String.valueOf(session.rangeAnchorTick()) : "-"};
+                "anchor_tick", session.hasRangeAnchor() ? String.valueOf(session.rangeAnchorTick()) : "-",
+                "paste_tick", session.hasPasteTick() ? String.valueOf(session.pasteTick()) : "-"};
         inv.setItem(slot, item(material, gui.name(basePath + ".name", ph), gui.lore(basePath + ".lore", ph)));
     }
 

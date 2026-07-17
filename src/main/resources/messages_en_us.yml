@@ -3,7 +3,7 @@
 # While config-version is 0, missing keys get copied in from messages_ko_kr.yml
 # on load, so you can translate the file in place. Keys you already translated
 # are left untouched
-config-version: 6
+config-version: 7
 
 prefix: "<light_purple>[MusicStudio]</light_purple> "
 
@@ -23,5 +23,8 @@ editor:
   copy-no-selection: "<red>Nothing selected. Shift+left click editor cells to pick a range."
   copy-no-notes: "<gray>The selected ticks contain no notes; the existing clipboard was preserved."
   copy-success: "<green>Copied <white><notes></white> notes from <white><ticks></white> selected ticks (<from>~<to>)."
+  paste-target-set: "<aqua>Paste target set to tick <white><tick></white>. Now press Paste."
+  paste-target-cleared: "<gray>Paste target cleared."
+  paste-no-target: "<red>No paste target. Click a tick banner below to pick the spot first."
   paste-empty: "<gray>The clipboard is empty. Copy a selection first."
   paste-result: "<green>At tick <white><tick></white>: pasted <white><pasted></white>, skipped <white><skipped></white>."
