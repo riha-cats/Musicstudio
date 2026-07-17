@@ -104,10 +104,14 @@ data class Target(
     val jdk: Int             // 컴파일 JDK 툴체인
 )
 
+// 26.1 폴더는 26.1.2-stable API 로 컴파일하되 26.1.1 까지 덮는다. 플러그인이 쓰는 컴파일
+// 심볼(Sound/Material 상수)이 26.1.1 과 26.1.2 에 동일함을 확인해서, stable 로 구워도 26.1.1
+// 에서 링크된다 (26.1.1 은 alpha 뿐이라 릴리스를 거기 대고 굽지 않는다).
+// 26.2 는 stable 이 없어(beta 까지) 보류 — 정식이 나오면 여기에 한 줄 추가한다
 val targets = listOf(
-    Target("1.20",   "io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT",     "1.20", 17, 21),
-    Target("1.21",   "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT",     "1.21", 21, 21),
-    Target("26.1.2", "io.papermc.paper:paper-api:26.1.2.build.69-stable", "1.21", 21, 25),
+    Target("1.20", "io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT",     "1.20", 17, 21),
+    Target("1.21", "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT",     "1.21", 21, 21),
+    Target("26.1", "io.papermc.paper:paper-api:26.1.2.build.69-stable", "1.21", 21, 25),
 )
 
 val uploadRoot = layout.buildDirectory.dir("libs/Upload")
